@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "futu-desktop-bridge"
+version = "0.2.3"
+description = "Read-only Python library and local HTTP API for Futu desktop market data"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.optional-dependencies]
+native = ["frida>=17.24,<18", "tzdata>=2024.1; platform_system == 'Windows'"]
+research = ["pypdf>=5,<6"]
+qlib = ["pyqlib==0.9.7", "pypdf>=5,<6"]
+
+[project.scripts]
+futu-bridge = "futu_bridge.server:main"
+futu-qlib-export = "futu_bridge.qlib_export:main"
+futu-deepseek-extract = "futu_bridge.deepseek_extractor:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["futu_bridge*"]
+exclude = ["futu_bridge.tests*"]
+
+[tool.setuptools.package-data]
+futu_bridge = ["*.js", "asset_fixtures.json", "market_universe.json"]
