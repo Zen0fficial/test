@@ -27,14 +27,12 @@ from .wire import parse_bars, parse_quote_snapshots
 from .feed_wire import parse_book, parse_trades
 from .option_wire import parse_option_chain, parse_option_expiries
 from .push_native import NativePushMixin
-from .calendar_native import NativeCalendarMixin, FTQUOTE_SHA256
+from .calendar_native import NativeCalendarMixin
 from .short_native import NativeShortVolumeMixin
+from .native_builds import SUPPORTED_VERSIONS, select_build
 
 
-SUPPORTED_VERSION = "16.33.17808"
-QOTBASE_SHA256 = "8b2ed71ee723d7e8ffabba8df4e8e8aaa1f09ce5ec2a3b16586f4109a2a0246e"
-COREBIZ_SHA256 = "1d48dc2712b4de4034c68316f7747775660720b0be90914aaa5b06c499450beb"
-FTNEWS_SHA256 = "9cdc686720c4e98bb42fcf08349f231be6179014b8cddd54c2f4df88cb964775"
+SUPPORTED_VERSION = SUPPORTED_VERSIONS[-1]
 PRICE_SCALE = 1_000_000_000
 FIELDS = ("stock_id", "code", "futu_symbol", "eng_name", "cs_market", "market_code",
           "instrument_type_v2", "sub_instrument_type_v2", "exchange", "listed_exchange",
@@ -318,19 +316,10 @@ class NativeProvider(NativePushMixin, NativeCalendarMixin, NativeShortVolumeMixi
         self.module_path = self.executable.parent / "QotBase.dll"
         if not self.module_path.is_file():
             raise ProviderError("version_unsupported", "QotBase.dll was not found beside the desktop executable.", 503)
-        self.module_sha256 = hashlib.sha256(self.module_path.read_bytes()).hexdigest()
-        if self.module_sha256 != QOTBASE_SHA256:
-            raise ProviderError("version_unsupported", "QotBase.dll does not match the validated desktop build; refusing native calls.", 503,
-                                {"supported_version": SUPPORTED_VERSION, "observed_sha256": self.module_sha256})
         self.core_module_path = self.executable.parent / "CoreBiz.dll"
-        if not self.core_module_path.is_file() or hashlib.sha256(self.core_module_path.read_bytes()).hexdigest() != COREBIZ_SHA256:
-            raise ProviderError("version_unsupported", "CoreBiz.dll does not match the validated transport build.", 503)
         self.news_module_path = self.executable.parent / "FTNews.dll"
-        self._news_module_valid = (self.news_module_path.is_file() and
-                                   hashlib.sha256(self.news_module_path.read_bytes()).hexdigest() == FTNEWS_SHA256)
         self.calendar_module_path = self.executable.parent / "FTQuote.dll"
-        self._calendar_module_valid = (self.calendar_module_path.is_file() and
-                                       hashlib.sha256(self.calendar_module_path.read_bytes()).hexdigest() == FTQUOTE_SHA256)
+        self._verify_build_files()
         try:
             self._attach_capture(device)
         except Exception as exc:
@@ -340,8 +329,24 @@ class NativeProvider(NativePushMixin, NativeCalendarMixin, NativeShortVolumeMixi
             raise ProviderError("native_attach_failed", "Could not initialize the desktop market-data adapter.", 503,
                                 {"error_type": type(exc).__name__}) from exc
 
+    def _verify_build_files(self):
+        def digest(path):
+            return hashlib.sha256(path.read_bytes()).hexdigest() if path.is_file() else None
+        quote_hash, core_hash = digest(self.module_path), digest(self.core_module_path)
+        build = select_build(quote_hash, core_hash)
+        if hasattr(self, "build") and build != self.build:
+            raise ProviderError("version_unsupported", "Desktop build changed before reconnect; create a new client.", 503)
+        self.build = build
+        self.module_sha256, self.core_module_sha256 = quote_hash, core_hash
+        self.news_module_sha256 = digest(self.news_module_path)
+        self.calendar_module_sha256 = digest(self.calendar_module_path)
+        self._news_module_valid = self.news_module_sha256 == build.ftnews_sha256
+        self._calendar_module_valid = self.calendar_module_sha256 == build.ftquote_sha256
+
     def _attach_capture(self, device):
-        sources = [(Path(__file__).with_name("native_agent.js")).read_text(encoding="utf-8")]
+        self._verify_build_files()
+        sources = ["var nativeBuild = Object.freeze(" + json.dumps(self.build.agent_configuration()) + ");",
+                   (Path(__file__).with_name("native_agent.js")).read_text(encoding="utf-8")]
         for extension_name in ("native_market.js", "native_ticks.js", "native_history.js", "native_snapshot.js", "native_options.js", "native_feed_requests.js", "native_push.js"):
             extension = Path(__file__).with_name(extension_name)
             if extension.is_file():
@@ -363,6 +368,8 @@ class NativeProvider(NativePushMixin, NativeCalendarMixin, NativeShortVolumeMixi
         script.on("message", lambda message, data: self._on_push_message(message, data, generation))
         script.load()
         info = script.exports_sync.initialize()
+        if info.get("desktop_version") != self.build.version:
+            raise ProviderError("version_unsupported", "The native agent build identity did not match the verified modules.", 503)
         if info["architecture"] != "x64" or info["pointer_size"] != 8:
             raise ProviderError("architecture_unsupported", "Only the verified x64 native ABI is supported.", 503)
         if Path(info["module_path"]).resolve() != self.module_path.resolve():
@@ -440,7 +447,7 @@ class NativeProvider(NativePushMixin, NativeCalendarMixin, NativeShortVolumeMixi
         return {"provider": self.name, "kind": kind, "live_push": False,
                 "entitlement": ("native subscription gates and desktop-session permissions" if kind == "native_push"
                                 else "server-enforced desktop-session permissions" if requested else "app-selected mode 1"),
-                "desktop_version": SUPPORTED_VERSION,
+                "desktop_version": self.build.version,
                 "module_sha256": self.module_sha256, "pid": self.pid, "observed_at": utcnow(),
                 "description": ("Market data requested through the running desktop session; inspect the returned market timestamp."
                                 if requested else "Market data read from the running desktop cache; inspect the returned market timestamp.")}
@@ -503,7 +510,7 @@ class NativeProvider(NativePushMixin, NativeCalendarMixin, NativeShortVolumeMixi
             caps["stream"] = {"available": connected, "types": ["quotes", "trades", "orderbook"], "mode": "polled_snapshot",
                               "changes_only": True, "live_push": False, "poll_interval_seconds": self.poll_interval}
         return {"provider": self.name, "connected": connected, "capabilities": caps,
-                "entitlement": "app-selected mode 1", "desktop_version": SUPPORTED_VERSION,
+                "entitlement": "app-selected mode 1", "desktop_version": self.build.version,
                 "asset_coverage": "Determined per symbol and feed by the desktop session's returned data; catalog presence alone is not coverage."}
 
     def bars(self, symbol: str, timeframe: str, start: Optional[str], end: Optional[str],
@@ -1023,7 +1030,7 @@ class NativeProvider(NativePushMixin, NativeCalendarMixin, NativeShortVolumeMixi
                       returned_count=returned_count, filtered_out_count=returned_count - len(parsed["items"]),
                       no_more_data=not parsed["has_more"], end_status=parsed["result"] == 1)
         source = self._source("stock_news")
-        source.update(protocol=7912, request_id=requested.get("request_id"), news_module_sha256=FTNEWS_SHA256,
+        source.update(protocol=7912, request_id=requested.get("request_id"), news_module_sha256=self.news_module_sha256,
                       native_flag=requested.get("request", {}).get("native_flag"), content="headlines_and_metadata")
         warnings = ["Futu's stock-news selection is not a complete historical news archive; when has_more is true, use the returned cursor for another page.",
                     "Publication time is not the first time a headline was available to this account; point-in-time backtest availability is unverified."]

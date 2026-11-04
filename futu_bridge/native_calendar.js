@@ -12,7 +12,7 @@ function calendarFinish(pending, result) {
         source_kind: 'desktop_session_financial_calendar_request', readonly: true}, result));
 }
 
-var calendarReplyObserver = Interceptor.attach(historyCoreModule.base.add(0xa4f80), {
+var calendarReplyObserver = Interceptor.attach(historyTransportReplyAddress, {
     onEnter(args) {
         const pending = calendarPending;
         if (!pending || pending.requestId === null) return;

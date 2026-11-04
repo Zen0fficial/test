@@ -13,7 +13,7 @@ function newsFinish(pending, fields) {
         source_kind: 'desktop_session_stock_news_request', readonly: true}, fields));
 }
 
-var newsReplyObserver = Interceptor.attach(historyCoreModule.base.add(0xa4f80), {
+var newsReplyObserver = Interceptor.attach(historyTransportReplyAddress, {
     onEnter(args) {
         const pending = newsPending;
         if (!pending || pending.requestId === null) return;
@@ -94,7 +94,7 @@ api.requestnews = function(stockId, options) {
     // FTNews 0x100b40/0x101050 calls this normal native boolean getter for field9.
     // Its meaning is deliberately not renamed to an unverified permission/language.
     const module = Process.getModuleByName('FTNews.dll');
-    const nativeFlag = new NativeFunction(module.base.add(0x69c80), 'uint', [])();
+    const nativeFlag = new NativeFunction(module.base.add(nativeBuild.news_flag_rva), 'uint', [])();
     if (nativeFlag !== 0 && nativeFlag !== 1) throw Error('Unknown native news flag');
     let bytes = [];
     for (const [number, value] of Object.entries({1:Number(stockId), 2:start, 3:end, 4:limit, 5:1, 6:0, 9:nativeFlag}))

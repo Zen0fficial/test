@@ -9,7 +9,6 @@ from .report_wire import parse_report_link
 from .provider import ProviderError, ProviderResult
 
 
-FTQUOTE_SHA256 = "899db0ccb14c1f4d818db87f976d4a0dd3994ba751687ed4d72e04c51e72bb33"
 MAX_CALENDAR_PAGES = 50
 
 
@@ -54,7 +53,7 @@ class NativeCalendarMixin:
                 "available": bool(item and item["url"]), "report": item, "content_type": "earnings_hub_web_page",
                 "pdf_available": None, "complete_history": False}
         source = self._source("earnings_report_link")
-        source.update(protocol=20846, calendar_module_sha256=FTQUOTE_SHA256,
+        source.update(protocol=20846, calendar_module_sha256=self.calendar_module_sha256,
                       request_id=response.get("request_id"), live_push=False, content="public_report_page_metadata")
         warnings = ["This is Futu's earnings hub page; it is not an original quarterly/annual report PDF or an official transcript.",
                     "Fiscal period and URL period can differ; both provider values are preserved without inferring a reporting-date conversion.",
@@ -148,7 +147,7 @@ class NativeCalendarMixin:
         complete = all(item["complete"] for item in coverage)
         matches.sort(key=lambda item: event_key(item)[:2])
         source = self._source("earnings_calendar")
-        source.update(protocol=20024, calendar_module_sha256=FTQUOTE_SHA256,
+        source.update(protocol=20024, calendar_module_sha256=self.calendar_module_sha256,
                       requests=requests, live_push=False, content="reporting_schedule_metadata")
         warnings = ["Dates and fiscal labels are reported by Futu; confirmed versus estimated status and the separate timestamp's meaning are unverified.",
                     "The current calendar is not a point-in-time historical archive and does not establish what was known before a report.",

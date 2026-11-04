@@ -94,7 +94,7 @@ function optionChainFinish(pending, fields) {
 // any response body. Static CoreBiz FTChannelProxy::OnPackageReceived RVA0xa4f80:
 // this, requestID, channel, f3cnetError, RecvData*; RecvData protocol@8,
 // payload pointer@0x10, payload byte count@0x18. No args/results are changed.
-var optionChainReplyObserver = Interceptor.attach(historyCoreModule.base.add(0xa4f80), {
+var optionChainReplyObserver = Interceptor.attach(historyTransportReplyAddress, {
     onEnter(args) {
       const pending = optionChainPending;
       if (!pending || pending.requestId === null) return;
@@ -221,31 +221,34 @@ api.readoptionexpiries = function(stockId, options) {
 
 // IOptionListData::GetItem(out shared_ptr16, uint64 ID, bool fetch_missing).
 // Getters return scalars or borrowed strings; copy before releasing the owner.
-// QotBase0x44b50 is the complete native shared_ptr destructor: strong-count
-// atomic decrement, virtual destroy on last owner, then weak-count decrement.
-var optionMetadataGetItem = new NativeFunction(qotModule.base.add(0xde3b),
+// Export names distinguish the uint64 overload from the string overloads.
+var optionMetadataGetItem = new NativeFunction(exportAddress('?GetItem@IOptionListData@option_list@@SA?AV?$shared_ptr@VCOptionData@option_list@@@std@@_K_N@Z'),
   'pointer', ['pointer', 'uint64', 'uint8']);
-var optionMetadataRelease = new NativeFunction(qotModule.base.add(0x44b50),
+var optionMetadataNativeRelease = new NativeFunction(qotModule.base.add(nativeBuild.option_release_rva),
   'void', ['pointer']);
+function optionMetadataRelease(holder) {
+  const argument = nativeBuild.option_release_control_block ? holder.add(8).readPointer() : holder;
+  if (!argument.isNull()) optionMetadataNativeRelease(argument);
+}
 var optionMetadataScalarSpecs = {
-  option_id: [0x49c6, 'uint64'], underlying_stock_id: [0xdac6, 'uint64'],
-  strike_date_raw: [0x4d77, 'int64'], strike_price_raw: [0xd594, 'int64'],
-  option_type_raw: [0x1b40, 'int'], real_expiration_date_raw: [0xcd10, 'int64'],
-  last_trading_time_raw: [0xeb15, 'int64'], is_delisted: [0xd477, 'uint8'],
-  market_id_raw: [0xceeb, 'int'], standard_type_raw: [0x8cdd, 'int'],
-  contract_share_size_raw: [0x68de, 'uint64'], multiplier_raw: [0x3300, 'uint64']
+  option_id: ['GetOptionID', 'uint64'], underlying_stock_id: ['GetUnderlyingStockID', 'uint64'],
+  strike_date_raw: ['GetStrikeDate', 'int64'], strike_price_raw: ['GetStrikePrice', 'int64'],
+  option_type_raw: ['GetOptionType', 'int'], real_expiration_date_raw: ['GetRealExpirationDate', 'int64'],
+  last_trading_time_raw: ['GetLastTradingTime', 'int64'], is_delisted: ['IsDelisting', 'uint8'],
+  market_id_raw: ['GetMarketID', 'int'], standard_type_raw: ['GetStandardType', 'int'],
+  contract_share_size_raw: ['GetHpContractShareSize', 'uint64'], multiplier_raw: ['GetHpMultiplier', 'uint64']
 };
 var optionMetadataStringSpecs = {
-  futu_symbol: 0x41ba, display_code: 0x58f3, underlying_symbol: 0x1b22,
-  exchange: 0xb8e8, origin_symbol: 0x818e, timezone: 0x7a04
+  futu_symbol: 'GetFutuSymbol', display_code: 'GetDisplayCode', underlying_symbol: 'GetUnderlyingSymbol',
+  exchange: 'GetExchange', origin_symbol: 'GetOriginSymbol', timezone: 'GetTimeZone'
 };
 var optionMetadataScalars = {}, optionMetadataStrings = {};
 Object.keys(optionMetadataScalarSpecs).forEach(function(name) {
   const spec = optionMetadataScalarSpecs[name];
-  optionMetadataScalars[name] = new NativeFunction(qotModule.base.add(spec[0]), spec[1], ['pointer']);
+  optionMetadataScalars[name] = new NativeFunction(exportAddress('?' + spec[0] + '@COptionData@option_list@@'), spec[1], ['pointer']);
 });
 Object.keys(optionMetadataStringSpecs).forEach(function(name) {
-  optionMetadataStrings[name] = new NativeFunction(qotModule.base.add(optionMetadataStringSpecs[name]),
+  optionMetadataStrings[name] = new NativeFunction(exportAddress('?' + optionMetadataStringSpecs[name] + '@COptionData@option_list@@'),
     'pointer', ['pointer']);
 });
 function optionMetadataReadString(address) {

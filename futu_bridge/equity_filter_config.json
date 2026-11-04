@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "top_n": 500,
+  "max_pages": 10,
+  "min_volume_24h": 0,
+  "low_liquidity_threshold": 1000,
+  "cache_ttl_hours": 24,
+  "model": "deepseek-v4-pro",
+  "reasoning_effort": "max",
+  "max_output_tokens": 65536,
+  "request_timeout_seconds": 300,
+  "retry_attempts": 3,
+  "retry_base_delay_seconds": 2,
+  "batch_size": 4,
+  "max_llm_events": 500,
+  "excluded_categories": ["sports", "esports", "e-sports", "entertainment", "pop-culture", "celebrities", "music", "movies", "tv"],
+  "candidate_categories": ["economy", "economics", "finance", "financials", "business", "stocks", "earnings", "fed", "fed-rates", "interest-rates", "inflation", "recession", "gdp", "unemployment", "politics", "us-politics", "elections", "geopolitics", "world", "global-politics", "trade", "tariffs", "technology", "tech", "ai", "energy", "oil", "commodities", "climate", "weather", "crypto", "cryptocurrency", "science", "health", "regulation"],
+  "asset_universe": {
+    "SPY": "US large-cap equity ETF", "QQQ": "Nasdaq-100 equity ETF", "IWM": "US small-cap equity ETF",
+    "AAPL": "Apple", "MSFT": "Microsoft", "NVDA": "NVIDIA", "AMZN": "Amazon", "GOOG": "Alphabet", "GOOGL": "Alphabet", "META": "Meta Platforms", "TSLA": "Tesla",
+    "AMD": "Advanced Micro Devices", "INTC": "Intel", "TSM": "Taiwan Semiconductor ADR", "AVGO": "Broadcom", "MU": "Micron",
+    "JPM": "JPMorgan Chase", "BAC": "Bank of America", "GS": "Goldman Sachs", "XOM": "Exxon Mobil", "CVX": "Chevron", "COP": "ConocoPhillips",
+    "LMT": "Lockheed Martin", "RTX": "RTX", "BA": "Boeing", "NOC": "Northrop Grumman", "CAT": "Caterpillar", "DE": "Deere",
+    "WMT": "Walmart", "COST": "Costco", "COIN": "Coinbase", "MSTR": "Strategy", "MARA": "MARA Holdings", "RIOT": "Riot Platforms", "NKE": "Nike", "DKNG": "DraftKings",
+    "UNH": "UnitedHealth", "LLY": "Eli Lilly", "PFE": "Pfizer", "JNJ": "Johnson & Johnson"
+  }
+}

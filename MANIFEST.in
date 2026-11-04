@@ -1,0 +1,6 @@
+include README.md
+include docs/polymarket.md
+include docs/equity-filter.md
+include .env.example
+include scripts/update_polymarket_catalog.py
+recursive-include examples *.py

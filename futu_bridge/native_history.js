@@ -1,11 +1,12 @@
 // Read-only chart-history requests through the app's existing signed-in session.
-// Build 16.33.17808 only. The Python loader must hash-gate CoreBiz.dll AND QotBase.dll.
+// The Python loader hash-gates CoreBiz/QotBase and supplies the selected build.
 // No credentials, headers, subscription permissions, or app callbacks are replaced.
 // Static evidence: FTQuote.dll RVA 0xc45b30 calls SendCommand(channel=1) with
 // CSProtoData{uint16 protocol; std::string payload}, empty callback, null owner.
 // Protocol/field enums: coverage_audit/evidence/desktop_kline_enums.json.
 
 var historyCoreModule = Process.getModuleByName('CoreBiz.dll');
+var historyTransportReplyAddress = historyCoreModule.base.add(nativeBuild.transport_reply_rva);
 var historyCoreExports = historyCoreModule.enumerateExports();
 var historySendExports = historyCoreExports.filter(x => x.type === 'function' &&
     x.name.startsWith('?SendCommand@IFTChannelProxy@@'));

@@ -7,7 +7,7 @@ var tickerGet = new NativeFunction(exportAddress('?GetDataByIndex@ticks@sub@quot
   'bool', ['uint64', 'uint', 'pointer', 'int', 'uint64']);
 // Internal nondeleting destructor, checked against this exact module hash.
 // It releases all four owning std::strings and does not free the record buffer.
-var tickerDestroy = new NativeFunction(qotModule.base.add(0xfb770),
+var tickerDestroy = new NativeFunction(qotModule.base.add(nativeBuild.ticker_destroy_rva),
   'void', ['pointer']);
 
 function tickerUnsigned(value) {

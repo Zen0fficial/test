@@ -1,0 +1,4613 @@
+{
+  "schema_version": 1,
+  "sources": {
+    "gamma": {
+      "url": "https://docs.polymarket.com/api-spec/gamma-openapi.yaml",
+      "sha256": "8b68e4ddd8bc4e11e5332127e6d8768a62006915999259c951568b2dc59c29a8"
+    },
+    "clob": {
+      "url": "https://docs.polymarket.com/api-spec/clob-openapi.yaml",
+      "sha256": "19268516978fc513ac3b02be4dde220df1236c56860e950395abfa9d51b58255"
+    },
+    "data": {
+      "url": "https://data-api.polymarket.com/v2/openapi.json",
+      "sha256": "cf4ceff85c26e6586c4164377dc4a1e9c1196ea7fa3ed94ce11a0fc083ca8fea"
+    }
+  },
+  "endpoints": [
+    {
+      "api": "gamma",
+      "method": "GET",
+      "path": "/status",
+      "summary": "Gamma API Health check",
+      "parameters": []
+    },
+    {
+      "api": "gamma",
+      "method": "GET",
+      "path": "/teams",
+      "summary": "List teams",
+      "parameters": [
+        {
+          "name": "limit",
+          "in": "query",
+          "schema": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        {
+          "name": "offset",
+          "in": "query",
+          "schema": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        {
+          "name": "order",
+          "in": "query",
+          "description": "Comma-separated list of fields to order by",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "ascending",
+          "in": "query",
+          "schema": {
+            "type": "boolean"
+          }
+        },
+        {
+          "name": "league",
+          "in": "query",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        {
+          "name": "name",
+          "in": "query",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        {
+          "name": "abbreviation",
+          "in": "query",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "api": "gamma",
+      "method": "GET",
+      "path": "/teams/{id}",
+      "summary": "Get team by id",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ]
+    },
+    {
+      "api": "gamma",
+      "method": "GET",
+      "path": "/tags",
+      "summary": "List tags",
+      "parameters": [
+        {
+          "name": "limit",
+          "in": "query",
+          "schema": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        {
+          "name": "offset",
+          "in": "query",
+          "schema": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        {
+          "name": "order",
+          "in": "query",
+          "description": "Comma-separated list of fields to order by",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "ascending",
+          "in": "query",
+          "schema": {
+            "type": "boolean"
+          }
+        },
+        {
+          "name": "include_template",
+          "in": "query",
+          "schema": {
+            "type": "boolean"
+          }
+        },
+        {
+          "name": "is_carousel",
+          "in": "query",
+          "schema": {
+            "type": "boolean"
+          }
+        }
+      ]
+    },
+    {
+      "api": "gamma",
+      "method": "GET",
+      "path": "/tags/{id}",
+      "summary": "Get tag by id",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "include_template",
+          "in": "query",
+          "schema": {
+            "type": "boolean"
+          }
+        }
+      ]
+    },
+    {
+      "api": "gamma",
+      "method": "GET",
+      "path": "/tags/slug/{slug}",
+      "summary": "Get tag by slug",
+      "parameters": [
+        {
+          "name": "slug",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "include_template",
+          "in": "query",
+          "schema": {
+            "type": "boolean"
+          }
+        }
+      ]
+    },
+    {
+      "api": "gamma",
+      "method": "GET",
+      "path": "/tags/{id}/related-tags",
+      "summary": "Get related tags (relationships) by tag id",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "omit_empty",
+          "in": "query",
+          "schema": {
+            "type": "boolean"
+          }
+        },
+        {
+          "name": "status",
+          "in": "query",
+          "schema": {
+            "type": "string",
+            "enum": [
+              "active",
+              "closed",
+              "all"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "api": "gamma",
+      "method": "GET",
+      "path": "/tags/slug/{slug}/related-tags",
+      "summary": "Get related tags (relationships) by tag slug",
+      "parameters": [
+        {
+          "name": "slug",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "omit_empty",
+          "in": "query",
+          "schema": {
+            "type": "boolean"
+          }
+        },
+        {
+          "name": "status",
+          "in": "query",
+          "schema": {
+            "type": "string",
+            "enum": [
+              "active",
+              "closed",
+              "all"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "api": "gamma",
+      "method": "GET",
+      "path": "/tags/{id}/related-tags/tags",
+      "summary": "Get tags related to a tag id",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "omit_empty",
+          "in": "query",
+          "schema": {
+            "type": "boolean"
+          }
+        },
+        {
+          "name": "status",
+          "in": "query",
+          "schema": {
+            "type": "string",
+            "enum": [
+              "active",
+              "closed",
+              "all"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "api": "gamma",
+      "method": "GET",
+      "path": "/tags/slug/{slug}/related-tags/tags",
+      "summary": "Get tags related to a tag slug",
+      "parameters": [
+        {
+          "name": "slug",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "omit_empty",
+          "in": "query",
+          "schema": {
+            "type": "boolean"
+          }
+        },
+        {
+          "name": "status",
+          "in": "query",
+          "schema": {
+            "type": "string",
+            "enum": [
+              "active",
+              "closed",
+              "all"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "api": "gamma",
+      "method": "GET",
+      "path": "/events",
+      "summary": "List events",
+      "parameters": [
+        {
+          "name": "limit",
+          "in": "query",
+          "schema": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        {
+          "name": "offset",
+          "in": "query",
+          "schema": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        {
+          "name": "order",
+          "in": "query",
+          "description": "Comma-separated list of fields to order by",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "ascending",
+          "in": "query",
+          "schema": {
+            "type": "boolean"
+          }
+        },
+        {
+          "name": "id",
+          "in": "query",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          }
+        },
+        {
+          "name": "tag_id",
+          "in": "query",
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "exclude_tag_id",
+          "in": "query",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          }
+        },
+        {
+          "name": "slug",
+          "in": "query",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        {
+          "name": "tag_slug",
+          "in": "query",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "related_tags",
+          "in": "query",
+          "schema": {
+            "type": "boolean"
+          }
+        },
+        {
+          "name": "active",
+          "in": "query",
+          "schema": {
+            "type": "boolean"
+          }
+        },
+        {
+          "name": "archived",
+          "in": "query",
+          "schema": {
+            "type": "boolean"
+          }
+        },
+        {
+          "name": "featured",
+          "in": "query",
+          "schema": {
+            "type": "boolean"
+          }
+        },
+        {
+          "name": "cyom",
+          "in": "query",
+          "schema": {
+            "type": "boolean"
+          }
+        },
+        {
+          "name": "include_chat",
+          "in": "query",
+          "schema": {
+            "type": "boolean"
+          }
+        },
+        {
+          "name": "include_template",
+          "in": "query",
+          "schema": {
+            "type": "boolean"
+          }
+        },
+        {
+          "name": "recurrence",
+          "in": "query",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "closed",
+          "in": "query",
+          "description": "Filter by closed state. Omitted includes open and closed events. Use true for closed events, false for open events, or any (case-insensitive) for both states. Unlike markets, any does not require an identifier filter. Invalid closed values return 422.\n",
+          "schema": {
+            "oneOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "string",
+                "enum": [
+                  "any"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "liquidity_min",
+          "in": "query",
+          "schema": {
+            "type": "number"
+          }
+        },
+        {
+          "name": "liquidity_max",
+          "in": "query",
+          "schema": {
+            "type": "number"
+          }
+        },
+        {
+          "name": "volume_min",
+          "in": "query",
+          "schema": {
+            "type": "number"
+          }
+        },
+        {
+          "name": "volume_max",
+          "in": "query",
+          "schema": {
+            "type": "number"
+          }
+        },
+        {
+          "name": "start_date_min",
+          "in": "query",
+          "schema": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        {
+          "name": "start_date_max",
+          "in": "query",
+          "schema": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        {
+          "name": "end_date_min",
+          "in": "query",
+          "schema": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        {
+          "name": "end_date_max",
+          "in": "query",
+          "schema": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        {
+          "name": "version",
+          "in": "query",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "v1",
+                "v2"
+              ]
+            }
+          },
+          "description": "Protocol version filter (official py-sdk 0.16.0); repeat to include v1 and v2."
+        }
+      ]
+    },
+    {
+      "api": "gamma",
+      "method": "GET",
+      "path": "/events/pagination",
+      "summary": "List events (paginated)",
+      "parameters": [
+        {
+          "name": "limit",
+          "in": "query",
+          "schema": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        {
+          "name": "offset",
+          "in": "query",
+          "schema": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        {
+          "name": "order",
+          "in": "query",
+          "description": "Comma-separated list of fields to order by",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "ascending",
+          "in": "query",
+          "schema": {
+            "type": "boolean"
+          }
+        },
+        {
+          "name": "include_chat",
+          "in": "query",
+          "schema": {
+            "type": "boolean"
+          }
+        },
+        {
+          "name": "include_template",
+          "in": "query",
+          "schema": {
+            "type": "boolean"
+          }
+        },
+        {
+          "name": "recurrence",
+          "in": "query",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    {
+      "api": "gamma",
+      "method": "GET",
+      "path": "/events/results",
+      "summary": "List sport events results",
+      "parameters": [
+        {
+          "name": "limit",
+          "in": "query",
+          "schema": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        {
+          "name": "offset",
+          "in": "query",
+          "schema": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        {
+          "name": "order",
+          "in": "query",
+          "description": "Comma-separated list of fields to order by",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "ascending",
+          "in": "query",
+          "schema": {
+            "type": "boolean"
+          }
+        }
+      ]
+    },
+    {
+      "api": "gamma",
+      "method": "GET",
+      "path": "/events/{id}",
+      "summary": "Get event by id",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "include_chat",
+          "in": "query",
+          "schema": {
+            "type": "boolean"
+          }
+        },
+        {
+          "name": "include_template",
+          "in": "query",
+          "schema": {
+            "type": "boolean"
+          }
+        }
+      ]
+    },
+    {
+      "api": "gamma",
+      "method": "GET",
+      "path": "/events/{id}/tweet-count",
+      "summary": "Get event tweet count",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ]
+    },
+    {
+      "api": "gamma",
+      "method": "GET",
+      "path": "/events/{id}/comments/count",
+      "summary": "Get event comment count",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ]
+    },
+    {
+      "api": "gamma",
+      "method": "GET",
+      "path": "/events/{id}/tags",
+      "summary": "Get event tags",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ]
+    },
+    {
+      "api": "gamma",
+      "method": "GET",
+      "path": "/events/slug/{slug}",
+      "summary": "Get event by slug",
+      "parameters": [
+        {
+          "name": "slug",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "include_chat",
+          "in": "query",
+          "schema": {
+            "type": "boolean"
+          }
+        },
+        {
+          "name": "include_template",
+          "in": "query",
+          "schema": {
+            "type": "boolean"
+          }
+        }
+      ]
+    },
+    {
+      "api": "gamma",
+      "method": "GET",
+      "path": "/events/creators",
+      "summary": "List event creators",
+      "parameters": [
+        {
+          "name": "limit",
+          "in": "query",
+          "schema": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        {
+          "name": "offset",
+          "in": "query",
+          "schema": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        {
+          "name": "order",
+          "in": "query",
+          "description": "Comma-separated list of fields to order by",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "ascending",
+          "in": "query",
+          "schema": {
+            "type": "boolean"
+          }
+        },
+        {
+          "name": "creator_name",
+          "in": "query",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "creator_handle",
+          "in": "query",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    {
+      "api": "gamma",
+      "method": "GET",
+      "path": "/events/creators/{id}",
+      "summary": "Get event creator by id",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ]
+    },
+    {
+      "api": "gamma",
+      "method": "GET",
+      "path": "/markets",
+      "summary": "List markets",
+      "parameters": [
+        {
+          "name": "limit",
+          "in": "query",
+          "schema": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        {
+          "name": "offset",
+          "in": "query",
+          "schema": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        {
+          "name": "order",
+          "in": "query",
+          "description": "Comma-separated list of fields to order by",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "ascending",
+          "in": "query",
+          "schema": {
+            "type": "boolean"
+          }
+        },
+        {
+          "name": "id",
+          "in": "query",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          }
+        },
+        {
+          "name": "slug",
+          "in": "query",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        {
+          "name": "clob_token_ids",
+          "in": "query",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        {
+          "name": "condition_ids",
+          "in": "query",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        {
+          "name": "liquidity_num_min",
+          "in": "query",
+          "schema": {
+            "type": "number"
+          }
+        },
+        {
+          "name": "liquidity_num_max",
+          "in": "query",
+          "schema": {
+            "type": "number"
+          }
+        },
+        {
+          "name": "volume_num_min",
+          "in": "query",
+          "schema": {
+            "type": "number"
+          }
+        },
+        {
+          "name": "volume_num_max",
+          "in": "query",
+          "schema": {
+            "type": "number"
+          }
+        },
+        {
+          "name": "start_date_min",
+          "in": "query",
+          "schema": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        {
+          "name": "start_date_max",
+          "in": "query",
+          "schema": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        {
+          "name": "end_date_min",
+          "in": "query",
+          "schema": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        {
+          "name": "end_date_max",
+          "in": "query",
+          "schema": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        {
+          "name": "tag_id",
+          "in": "query",
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "related_tags",
+          "in": "query",
+          "schema": {
+            "type": "boolean"
+          }
+        },
+        {
+          "name": "cyom",
+          "in": "query",
+          "schema": {
+            "type": "boolean"
+          }
+        },
+        {
+          "name": "uma_resolution_status",
+          "in": "query",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "game_id",
+          "in": "query",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "sports_market_types",
+          "in": "query",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        {
+          "name": "rewards_min_size",
+          "in": "query",
+          "schema": {
+            "type": "number"
+          }
+        },
+        {
+          "name": "question_ids",
+          "in": "query",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        {
+          "name": "include_tag",
+          "in": "query",
+          "schema": {
+            "type": "boolean"
+          }
+        },
+        {
+          "name": "closed",
+          "in": "query",
+          "description": "Filter by closed state. Omitted or false returns open markets; true returns closed markets. Use any (case-insensitive) to include both states in an identifier lookup. Requires at least one of id, slug, clob_token_ids, position_ids, condition_ids, request_ids, onchain_event_ids, or question_ids when any is used. Each identifier filter accepts at most 100 values. Missing an identifier with any, or an invalid closed value, returns 422.\n",
+          "schema": {
+            "oneOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "string",
+                "enum": [
+                  "any"
+                ]
+              }
+            ],
+            "default": false
+          }
+        },
+        {
+          "name": "version",
+          "in": "query",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "v1",
+                "v2"
+              ]
+            }
+          },
+          "description": "Protocol version filter (official py-sdk 0.16.0); repeat to include v1 and v2."
+        },
+        {
+          "name": "position_ids",
+          "in": "query",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "description": "Current Gamma filter documented in official py-sdk 0.16.0."
+        },
+        {
+          "name": "request_ids",
+          "in": "query",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 100
+          },
+          "description": "Current Gamma filter documented in official py-sdk 0.16.0."
+        },
+        {
+          "name": "onchain_event_ids",
+          "in": "query",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 100
+          },
+          "description": "Current Gamma filter documented in official py-sdk 0.16.0."
+        },
+        {
+          "name": "resolution_status",
+          "in": "query",
+          "schema": {
+            "type": "string",
+            "enum": [
+              "inactive",
+              "active",
+              "resolved"
+            ]
+          },
+          "description": "Current Gamma filter documented in official py-sdk 0.16.0."
+        },
+        {
+          "name": "market_maker_address",
+          "in": "query",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "description": "Current Gamma filter documented in official py-sdk 0.16.0."
+        }
+      ]
+    },
+    {
+      "api": "gamma",
+      "method": "GET",
+      "path": "/markets/{id}",
+      "summary": "Get market by id",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "include_tag",
+          "in": "query",
+          "schema": {
+            "type": "boolean"
+          }
+        }
+      ]
+    },
+    {
+      "api": "gamma",
+      "method": "GET",
+      "path": "/markets/{id}/description",
+      "summary": "Get market description by id",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ]
+    },
+    {
+      "api": "gamma",
+      "method": "GET",
+      "path": "/markets/{id}/tags",
+      "summary": "Get market tags by id",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ]
+    },
+    {
+      "api": "gamma",
+      "method": "GET",
+      "path": "/markets/slug/{slug}",
+      "summary": "Get market by slug",
+      "parameters": [
+        {
+          "name": "slug",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "include_tag",
+          "in": "query",
+          "schema": {
+            "type": "boolean"
+          }
+        }
+      ]
+    },
+    {
+      "api": "gamma",
+      "method": "POST",
+      "path": "/markets/information",
+      "summary": "Query markets by information filters",
+      "parameters": []
+    },
+    {
+      "api": "gamma",
+      "method": "POST",
+      "path": "/markets/abridged",
+      "summary": "Query abridged markets by information filters",
+      "parameters": []
+    },
+    {
+      "api": "gamma",
+      "method": "GET",
+      "path": "/markets/keyset",
+      "summary": "List markets (keyset pagination)",
+      "parameters": [
+        {
+          "name": "limit",
+          "in": "query",
+          "description": "Maximum number of results to return (max 100)",
+          "schema": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100,
+            "default": 20
+          }
+        },
+        {
+          "name": "order",
+          "in": "query",
+          "description": "Comma-separated list of JSON field names to order by, e.g. volume_num,liquidity_num",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "ascending",
+          "in": "query",
+          "description": "Sort direction. Only used when order is set.",
+          "schema": {
+            "type": "boolean",
+            "default": true
+          }
+        },
+        {
+          "name": "after_cursor",
+          "in": "query",
+          "description": "Opaque cursor token from a previous response's next_cursor",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "offset",
+          "in": "query",
+          "description": "Not allowed. Returns 422 if provided.",
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "id",
+          "in": "query",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          }
+        },
+        {
+          "name": "slug",
+          "in": "query",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        {
+          "name": "closed",
+          "in": "query",
+          "description": "Filter by closed state. Omitted or false returns open markets; true returns closed markets. Use any (case-insensitive) to include both states in an identifier lookup. Requires at least one of id, slug, clob_token_ids, position_ids, condition_ids, request_ids, onchain_event_ids, or question_ids when any is used. Each identifier filter accepts at most 100 values. Missing an identifier with any, or an invalid closed value, returns 422.\n",
+          "schema": {
+            "oneOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "string",
+                "enum": [
+                  "any"
+                ]
+              }
+            ],
+            "default": false
+          }
+        },
+        {
+          "name": "decimalized",
+          "in": "query",
+          "schema": {
+            "type": "boolean"
+          }
+        },
+        {
+          "name": "clob_token_ids",
+          "in": "query",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        {
+          "name": "condition_ids",
+          "in": "query",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        {
+          "name": "question_ids",
+          "in": "query",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        {
+          "name": "liquidity_num_min",
+          "in": "query",
+          "schema": {
+            "type": "number"
+          }
+        },
+        {
+          "name": "liquidity_num_max",
+          "in": "query",
+          "schema": {
+            "type": "number"
+          }
+        },
+        {
+          "name": "volume_num_min",
+          "in": "query",
+          "schema": {
+            "type": "number"
+          }
+        },
+        {
+          "name": "volume_num_max",
+          "in": "query",
+          "schema": {
+            "type": "number"
+          }
+        },
+        {
+          "name": "start_date_min",
+          "in": "query",
+          "schema": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        {
+          "name": "start_date_max",
+          "in": "query",
+          "schema": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        {
+          "name": "end_date_min",
+          "in": "query",
+          "schema": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        {
+          "name": "end_date_max",
+          "in": "query",
+          "schema": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        {
+          "name": "tag_id",
+          "in": "query",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          }
+        },
+        {
+          "name": "related_tags",
+          "in": "query",
+          "schema": {
+            "type": "boolean"
+          }
+        },
+        {
+          "name": "tag_match",
+          "in": "query",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "cyom",
+          "in": "query",
+          "schema": {
+            "type": "boolean"
+          }
+        },
+        {
+          "name": "rfq_enabled",
+          "in": "query",
+          "schema": {
+            "type": "boolean"
+          }
+        },
+        {
+          "name": "uma_resolution_status",
+          "in": "query",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "game_id",
+          "in": "query",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "sports_market_types",
+          "in": "query",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        {
+          "name": "include_tag",
+          "in": "query",
+          "description": "When true, includes Tags relation on each market",
+          "schema": {
+            "type": "boolean"
+          }
+        },
+        {
+          "name": "locale",
+          "in": "query",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "version",
+          "in": "query",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "v1",
+                "v2"
+              ]
+            }
+          },
+          "description": "Protocol version filter (official py-sdk 0.16.0); repeat to include v1 and v2."
+        },
+        {
+          "name": "position_ids",
+          "in": "query",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "description": "Current Gamma filter documented in official py-sdk 0.16.0."
+        },
+        {
+          "name": "request_ids",
+          "in": "query",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 100
+          },
+          "description": "Current Gamma filter documented in official py-sdk 0.16.0."
+        },
+        {
+          "name": "onchain_event_ids",
+          "in": "query",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 100
+          },
+          "description": "Current Gamma filter documented in official py-sdk 0.16.0."
+        },
+        {
+          "name": "resolution_status",
+          "in": "query",
+          "schema": {
+            "type": "string",
+            "enum": [
+              "inactive",
+              "active",
+              "resolved"
+            ]
+          },
+          "description": "Current Gamma filter documented in official py-sdk 0.16.0."
+        },
+        {
+          "name": "market_maker_address",
+          "in": "query",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "description": "Current Gamma filter documented in official py-sdk 0.16.0."
+        },
+        {
+          "name": "rewards_min_size",
+          "in": "query",
+          "schema": {
+            "type": "number"
+          },
+          "description": "Current Gamma filter documented in official py-sdk 0.16.0."
+        }
+      ]
+    },
+    {
+      "api": "gamma",
+      "method": "GET",
+      "path": "/events/keyset",
+      "summary": "List events (keyset pagination)",
+      "parameters": [
+        {
+          "name": "limit",
+          "in": "query",
+          "description": "Maximum number of results to return (max 100)",
+          "schema": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100,
+            "default": 20
+          }
+        },
+        {
+          "name": "order",
+          "in": "query",
+          "description": "Comma-separated list of JSON field names to order by",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "ascending",
+          "in": "query",
+          "description": "Sort direction. Only used when order is set.",
+          "schema": {
+            "type": "boolean",
+            "default": true
+          }
+        },
+        {
+          "name": "after_cursor",
+          "in": "query",
+          "description": "Opaque cursor token from a previous response's next_cursor",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "offset",
+          "in": "query",
+          "description": "Not allowed. Returns 422 if provided.",
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "id",
+          "in": "query",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          }
+        },
+        {
+          "name": "slug",
+          "in": "query",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        {
+          "name": "closed",
+          "in": "query",
+          "description": "Filter by closed state. Omitted includes open and closed events. Use true for closed events, false for open events, or any (case-insensitive) for both states. Unlike markets, any does not require an identifier filter. Invalid closed values return 422.\n",
+          "schema": {
+            "oneOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "string",
+                "enum": [
+                  "any"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "live",
+          "in": "query",
+          "schema": {
+            "type": "boolean"
+          }
+        },
+        {
+          "name": "featured",
+          "in": "query",
+          "schema": {
+            "type": "boolean"
+          }
+        },
+        {
+          "name": "cyom",
+          "in": "query",
+          "schema": {
+            "type": "boolean"
+          }
+        },
+        {
+          "name": "title_search",
+          "in": "query",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "liquidity_min",
+          "in": "query",
+          "schema": {
+            "type": "number"
+          }
+        },
+        {
+          "name": "liquidity_max",
+          "in": "query",
+          "schema": {
+            "type": "number"
+          }
+        },
+        {
+          "name": "volume_min",
+          "in": "query",
+          "schema": {
+            "type": "number"
+          }
+        },
+        {
+          "name": "volume_max",
+          "in": "query",
+          "schema": {
+            "type": "number"
+          }
+        },
+        {
+          "name": "start_date_min",
+          "in": "query",
+          "schema": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        {
+          "name": "start_date_max",
+          "in": "query",
+          "schema": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        {
+          "name": "end_date_min",
+          "in": "query",
+          "schema": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        {
+          "name": "end_date_max",
+          "in": "query",
+          "schema": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        {
+          "name": "start_time_min",
+          "in": "query",
+          "schema": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        {
+          "name": "start_time_max",
+          "in": "query",
+          "schema": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        {
+          "name": "tag_id",
+          "in": "query",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          }
+        },
+        {
+          "name": "tag_slug",
+          "in": "query",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "exclude_tag_id",
+          "in": "query",
+          "description": "Tag IDs to exclude. Cannot overlap with tag_id.",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          }
+        },
+        {
+          "name": "related_tags",
+          "in": "query",
+          "schema": {
+            "type": "boolean"
+          }
+        },
+        {
+          "name": "tag_match",
+          "in": "query",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "series_id",
+          "in": "query",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          }
+        },
+        {
+          "name": "game_id",
+          "in": "query",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          }
+        },
+        {
+          "name": "event_date",
+          "in": "query",
+          "schema": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        {
+          "name": "event_week",
+          "in": "query",
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "featured_order",
+          "in": "query",
+          "schema": {
+            "type": "boolean"
+          }
+        },
+        {
+          "name": "recurrence",
+          "in": "query",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "created_by",
+          "in": "query",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        {
+          "name": "parent_event_id",
+          "in": "query",
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "include_children",
+          "in": "query",
+          "schema": {
+            "type": "boolean"
+          }
+        },
+        {
+          "name": "partner_slug",
+          "in": "query",
+          "description": "When set, external_partners are attached to matching events",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "include_chat",
+          "in": "query",
+          "description": "When true, includes Chats and Series.Chats relations",
+          "schema": {
+            "type": "boolean"
+          }
+        },
+        {
+          "name": "include_template",
+          "in": "query",
+          "description": "When true, includes Templates relation",
+          "schema": {
+            "type": "boolean"
+          }
+        },
+        {
+          "name": "include_best_lines",
+          "in": "query",
+          "description": "When true, includes BestLines relation",
+          "schema": {
+            "type": "boolean"
+          }
+        },
+        {
+          "name": "locale",
+          "in": "query",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "version",
+          "in": "query",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "v1",
+                "v2"
+              ]
+            }
+          },
+          "description": "Protocol version filter (official py-sdk 0.16.0); repeat to include v1 and v2."
+        }
+      ]
+    },
+    {
+      "api": "gamma",
+      "method": "GET",
+      "path": "/series",
+      "summary": "List series",
+      "parameters": [
+        {
+          "name": "limit",
+          "in": "query",
+          "schema": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        {
+          "name": "offset",
+          "in": "query",
+          "schema": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        {
+          "name": "order",
+          "in": "query",
+          "description": "Comma-separated list of fields to order by",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "ascending",
+          "in": "query",
+          "schema": {
+            "type": "boolean"
+          }
+        },
+        {
+          "name": "slug",
+          "in": "query",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        {
+          "name": "categories_ids",
+          "in": "query",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          }
+        },
+        {
+          "name": "categories_labels",
+          "in": "query",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        {
+          "name": "closed",
+          "in": "query",
+          "schema": {
+            "type": "boolean"
+          }
+        },
+        {
+          "name": "include_chat",
+          "in": "query",
+          "schema": {
+            "type": "boolean"
+          }
+        },
+        {
+          "name": "recurrence",
+          "in": "query",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "exclude_events",
+          "in": "query",
+          "schema": {
+            "type": "boolean"
+          }
+        }
+      ]
+    },
+    {
+      "api": "gamma",
+      "method": "GET",
+      "path": "/series/{id}",
+      "summary": "Get series by id",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "include_chat",
+          "in": "query",
+          "schema": {
+            "type": "boolean"
+          }
+        }
+      ]
+    },
+    {
+      "api": "gamma",
+      "method": "GET",
+      "path": "/series/{id}/comments/count",
+      "summary": "Get series comment count",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ]
+    },
+    {
+      "api": "gamma",
+      "method": "GET",
+      "path": "/series-summary/{id}",
+      "summary": "Get series summary by id",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ]
+    },
+    {
+      "api": "gamma",
+      "method": "GET",
+      "path": "/series-summary/slug/{slug}",
+      "summary": "Get series summary by slug",
+      "parameters": [
+        {
+          "name": "slug",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    {
+      "api": "gamma",
+      "method": "GET",
+      "path": "/comments",
+      "summary": "List comments",
+      "parameters": [
+        {
+          "name": "limit",
+          "in": "query",
+          "schema": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        {
+          "name": "offset",
+          "in": "query",
+          "schema": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        {
+          "name": "order",
+          "in": "query",
+          "description": "Comma-separated list of fields to order by",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "ascending",
+          "in": "query",
+          "schema": {
+            "type": "boolean"
+          }
+        },
+        {
+          "name": "parent_entity_type",
+          "in": "query",
+          "schema": {
+            "type": "string",
+            "enum": [
+              "Event",
+              "Series",
+              "market"
+            ]
+          }
+        },
+        {
+          "name": "parent_entity_id",
+          "in": "query",
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "get_positions",
+          "in": "query",
+          "schema": {
+            "type": "boolean"
+          }
+        },
+        {
+          "name": "holders_only",
+          "in": "query",
+          "schema": {
+            "type": "boolean"
+          }
+        }
+      ]
+    },
+    {
+      "api": "gamma",
+      "method": "GET",
+      "path": "/comments/{id}",
+      "summary": "Get comments by comment id",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "get_positions",
+          "in": "query",
+          "schema": {
+            "type": "boolean"
+          }
+        }
+      ]
+    },
+    {
+      "api": "gamma",
+      "method": "GET",
+      "path": "/comments/user_address/{user_address}",
+      "summary": "Get comments by user address",
+      "parameters": [
+        {
+          "name": "user_address",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "schema": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        {
+          "name": "offset",
+          "in": "query",
+          "schema": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        {
+          "name": "order",
+          "in": "query",
+          "description": "Comma-separated list of fields to order by",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "ascending",
+          "in": "query",
+          "schema": {
+            "type": "boolean"
+          }
+        }
+      ]
+    },
+    {
+      "api": "gamma",
+      "method": "GET",
+      "path": "/public-profile",
+      "summary": "Get public profile by wallet address",
+      "parameters": [
+        {
+          "name": "address",
+          "in": "query",
+          "required": true,
+          "description": "The wallet address (proxy wallet or user address)",
+          "schema": {
+            "type": "string",
+            "pattern": "^0x[a-fA-F0-9]{40}$"
+          }
+        }
+      ]
+    },
+    {
+      "api": "gamma",
+      "method": "GET",
+      "path": "/profiles/user_address/{user_address}",
+      "summary": "Get public profile by user address",
+      "parameters": [
+        {
+          "name": "user_address",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^0x[a-fA-F0-9]{40}$"
+          }
+        }
+      ]
+    },
+    {
+      "api": "gamma",
+      "method": "GET",
+      "path": "/sports",
+      "summary": "Get sports metadata information",
+      "parameters": []
+    },
+    {
+      "api": "gamma",
+      "method": "GET",
+      "path": "/sports/market-types",
+      "summary": "Get valid sports market types",
+      "parameters": []
+    },
+    {
+      "api": "gamma",
+      "method": "GET",
+      "path": "/public-search",
+      "summary": "Search markets, events, and profiles",
+      "parameters": [
+        {
+          "name": "q",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "cache",
+          "in": "query",
+          "schema": {
+            "type": "boolean"
+          }
+        },
+        {
+          "name": "events_status",
+          "in": "query",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "limit_per_type",
+          "in": "query",
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "page",
+          "in": "query",
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "events_tag",
+          "in": "query",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        {
+          "name": "keep_closed_markets",
+          "in": "query",
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "sort",
+          "in": "query",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "ascending",
+          "in": "query",
+          "schema": {
+            "type": "boolean"
+          }
+        },
+        {
+          "name": "search_tags",
+          "in": "query",
+          "schema": {
+            "type": "boolean"
+          }
+        },
+        {
+          "name": "search_profiles",
+          "in": "query",
+          "schema": {
+            "type": "boolean"
+          }
+        },
+        {
+          "name": "recurrence",
+          "in": "query",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "exclude_tag_id",
+          "in": "query",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          }
+        },
+        {
+          "name": "optimized",
+          "in": "query",
+          "schema": {
+            "type": "boolean"
+          }
+        }
+      ]
+    },
+    {
+      "api": "clob",
+      "method": "GET",
+      "path": "/time",
+      "summary": "Get server time",
+      "parameters": []
+    },
+    {
+      "api": "clob",
+      "method": "GET",
+      "path": "/midpoint",
+      "summary": "Get midpoint price",
+      "parameters": [
+        {
+          "name": "token_id",
+          "in": "query",
+          "required": true,
+          "description": "Token ID (asset ID)",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    {
+      "api": "clob",
+      "method": "GET",
+      "path": "/midpoints",
+      "summary": "Get midpoint prices (query parameters)",
+      "parameters": [
+        {
+          "name": "token_ids",
+          "in": "query",
+          "required": true,
+          "description": "Comma-separated list of token IDs",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    {
+      "api": "clob",
+      "method": "POST",
+      "path": "/midpoints",
+      "summary": "Get midpoint prices (request body)",
+      "parameters": []
+    },
+    {
+      "api": "clob",
+      "method": "GET",
+      "path": "/spread",
+      "summary": "Get spread",
+      "parameters": [
+        {
+          "name": "token_id",
+          "in": "query",
+          "required": true,
+          "description": "Token ID (asset ID)",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    {
+      "api": "clob",
+      "method": "POST",
+      "path": "/spreads",
+      "summary": "Get spreads",
+      "parameters": []
+    },
+    {
+      "api": "clob",
+      "method": "GET",
+      "path": "/last-trade-price",
+      "summary": "Get last trade price",
+      "parameters": [
+        {
+          "name": "token_id",
+          "in": "query",
+          "required": true,
+          "description": "Token ID (asset ID)",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    {
+      "api": "clob",
+      "method": "GET",
+      "path": "/last-trades-prices",
+      "summary": "Get last trade prices (query parameters)",
+      "parameters": [
+        {
+          "name": "token_ids",
+          "in": "query",
+          "required": true,
+          "description": "Comma-separated list of token IDs (max 500)",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    {
+      "api": "clob",
+      "method": "POST",
+      "path": "/last-trades-prices",
+      "summary": "Get last trade prices (request body)",
+      "parameters": []
+    },
+    {
+      "api": "clob",
+      "method": "GET",
+      "path": "/fee-rate",
+      "summary": "Get fee rate",
+      "parameters": [
+        {
+          "name": "token_id",
+          "in": "query",
+          "required": false,
+          "description": "Token ID (asset ID)",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    {
+      "api": "clob",
+      "method": "GET",
+      "path": "/fee-rate/{token_id}",
+      "summary": "Get fee rate by path parameter",
+      "parameters": [
+        {
+          "name": "token_id",
+          "in": "path",
+          "required": true,
+          "description": "Token ID (asset ID)",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    {
+      "api": "clob",
+      "method": "GET",
+      "path": "/tick-size",
+      "summary": "Get tick size",
+      "parameters": [
+        {
+          "name": "token_id",
+          "in": "query",
+          "required": false,
+          "description": "Token ID (asset ID)",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    {
+      "api": "clob",
+      "method": "GET",
+      "path": "/tick-size/{token_id}",
+      "summary": "Get tick size by path parameter",
+      "parameters": [
+        {
+          "name": "token_id",
+          "in": "path",
+          "required": true,
+          "description": "Token ID (asset ID)",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    {
+      "api": "clob",
+      "method": "GET",
+      "path": "/neg-risk",
+      "summary": "Get negative risk flag",
+      "parameters": [
+        {
+          "name": "token_id",
+          "in": "query",
+          "required": false,
+          "description": "Token ID (asset ID)",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    {
+      "api": "clob",
+      "method": "GET",
+      "path": "/neg-risk/{token_id}",
+      "summary": "Get negative risk flag by path parameter",
+      "parameters": [
+        {
+          "name": "token_id",
+          "in": "path",
+          "required": true,
+          "description": "Token ID (asset ID)",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    {
+      "api": "clob",
+      "method": "GET",
+      "path": "/price",
+      "summary": "Get market price",
+      "parameters": [
+        {
+          "name": "token_id",
+          "in": "query",
+          "required": true,
+          "description": "Token ID (asset ID)",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "side",
+          "in": "query",
+          "required": true,
+          "description": "Order side",
+          "schema": {
+            "type": "string",
+            "enum": [
+              "BUY",
+              "SELL"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "api": "clob",
+      "method": "GET",
+      "path": "/prices",
+      "summary": "Get market prices (query parameters)",
+      "parameters": [
+        {
+          "name": "token_ids",
+          "in": "query",
+          "required": true,
+          "description": "Comma-separated list of token IDs",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "sides",
+          "in": "query",
+          "required": true,
+          "description": "Comma-separated list of sides (BUY or SELL) corresponding to token IDs",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    {
+      "api": "clob",
+      "method": "POST",
+      "path": "/prices",
+      "summary": "Get market prices (request body)",
+      "parameters": []
+    },
+    {
+      "api": "clob",
+      "method": "GET",
+      "path": "/book",
+      "summary": "Get order book",
+      "parameters": [
+        {
+          "name": "token_id",
+          "in": "query",
+          "required": true,
+          "description": "Token ID (asset ID)",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    {
+      "api": "clob",
+      "method": "GET",
+      "path": "/books",
+      "summary": "Get order books (query parameters)",
+      "parameters": [
+        {
+          "name": "token_ids",
+          "in": "query",
+          "required": true,
+          "description": "Comma-separated list of token IDs",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    {
+      "api": "clob",
+      "method": "POST",
+      "path": "/books",
+      "summary": "Get order books (request body)",
+      "parameters": []
+    },
+    {
+      "api": "clob",
+      "method": "GET",
+      "path": "/simplified-markets",
+      "summary": "Get simplified markets",
+      "parameters": [
+        {
+          "name": "next_cursor",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    {
+      "api": "clob",
+      "method": "GET",
+      "path": "/sampling-markets",
+      "summary": "Get sampling markets",
+      "parameters": [
+        {
+          "name": "next_cursor",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    {
+      "api": "clob",
+      "method": "GET",
+      "path": "/sampling-simplified-markets",
+      "summary": "Get sampling simplified markets",
+      "parameters": [
+        {
+          "name": "next_cursor",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    {
+      "api": "clob",
+      "method": "GET",
+      "path": "/clob-markets/{condition_id}",
+      "summary": "Get CLOB market info",
+      "parameters": [
+        {
+          "name": "condition_id",
+          "in": "path",
+          "required": true,
+          "description": "The condition ID of the market",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    {
+      "api": "clob",
+      "method": "GET",
+      "path": "/markets-by-token/{token_id}",
+      "summary": "Get market by token",
+      "parameters": [
+        {
+          "name": "token_id",
+          "in": "path",
+          "required": true,
+          "description": "The token ID to look up the parent market for",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    {
+      "api": "clob",
+      "method": "POST",
+      "path": "/markets/live-activity",
+      "summary": "Get live activity markets by condition IDs",
+      "parameters": []
+    },
+    {
+      "api": "clob",
+      "method": "GET",
+      "path": "/markets/live-activity/{condition_id}",
+      "summary": "Get live activity market by condition ID",
+      "parameters": [
+        {
+          "name": "condition_id",
+          "in": "path",
+          "required": true,
+          "description": "The condition ID of the market",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    {
+      "api": "clob",
+      "method": "GET",
+      "path": "/prices-history",
+      "summary": "Get prices history",
+      "parameters": [
+        {
+          "name": "market",
+          "in": "query",
+          "required": true,
+          "description": "The market (asset id) to query.",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "startTs",
+          "in": "query",
+          "required": false,
+          "description": "Filter by items after this unix timestamp.",
+          "schema": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        {
+          "name": "endTs",
+          "in": "query",
+          "required": false,
+          "description": "Filter by items before this unix timestamp.",
+          "schema": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        {
+          "name": "interval",
+          "in": "query",
+          "required": false,
+          "description": "Time interval for data aggregation.",
+          "schema": {
+            "type": "string",
+            "enum": [
+              "max",
+              "all",
+              "1m",
+              "1w",
+              "1d",
+              "6h",
+              "1h"
+            ]
+          }
+        },
+        {
+          "name": "fidelity",
+          "in": "query",
+          "required": false,
+          "description": "Accuracy of the data expressed in minutes. Default is 1 minute.",
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ]
+    },
+    {
+      "api": "clob",
+      "method": "POST",
+      "path": "/batch-prices-history",
+      "summary": "Get batch prices history",
+      "parameters": []
+    },
+    {
+      "api": "clob",
+      "method": "GET",
+      "path": "/rewards/markets/current",
+      "summary": "Get current active rewards configurations",
+      "parameters": [
+        {
+          "name": "sponsored",
+          "in": "query",
+          "required": false,
+          "description": "If true, returns sponsored reward configurations instead of standard ones",
+          "schema": {
+            "type": "boolean",
+            "default": false
+          }
+        },
+        {
+          "name": "next_cursor",
+          "in": "query",
+          "required": false,
+          "description": "Pagination cursor from previous response",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    {
+      "api": "clob",
+      "method": "GET",
+      "path": "/rewards/markets/{condition_id}",
+      "summary": "Get raw rewards for a specific market",
+      "parameters": [
+        {
+          "name": "condition_id",
+          "in": "path",
+          "required": true,
+          "description": "The condition ID of the market",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "sponsored",
+          "in": "query",
+          "required": false,
+          "description": "If true, folds sponsored daily rates into each config's rate_per_day",
+          "schema": {
+            "type": "boolean",
+            "default": false
+          }
+        },
+        {
+          "name": "next_cursor",
+          "in": "query",
+          "required": false,
+          "description": "Pagination cursor from previous response",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    {
+      "api": "clob",
+      "method": "GET",
+      "path": "/rewards/markets/multi",
+      "summary": "Get multiple markets with rewards",
+      "parameters": [
+        {
+          "name": "q",
+          "in": "query",
+          "required": false,
+          "description": "Text search on market question/description",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "tag_slug",
+          "in": "query",
+          "required": false,
+          "description": "Filter by tag slug. Can be repeated for OR logic (e.g., ?tag_slug=sports&tag_slug=politics)",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "event_id",
+          "in": "query",
+          "required": false,
+          "description": "Filter by event ID. Can be repeated for multiple events (e.g., ?event_id=100&event_id=200)",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "event_title",
+          "in": "query",
+          "required": false,
+          "description": "Search event titles using case-insensitive pattern matching",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "order_by",
+          "in": "query",
+          "required": false,
+          "description": "Field to sort results by",
+          "schema": {
+            "type": "string",
+            "enum": [
+              "market_id",
+              "created_at",
+              "volume_24hr",
+              "spread",
+              "competitiveness",
+              "max_spread",
+              "min_size",
+              "question",
+              "one_day_price_change",
+              "rate_per_day",
+              "price",
+              "end_date",
+              "start_date",
+              "reward_end_date"
+            ]
+          }
+        },
+        {
+          "name": "position",
+          "in": "query",
+          "required": false,
+          "description": "Sort direction",
+          "schema": {
+            "type": "string",
+            "enum": [
+              "ASC",
+              "DESC"
+            ]
+          }
+        },
+        {
+          "name": "min_volume_24hr",
+          "in": "query",
+          "required": false,
+          "description": "Minimum 24-hour volume filter",
+          "schema": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        {
+          "name": "max_volume_24hr",
+          "in": "query",
+          "required": false,
+          "description": "Maximum 24-hour volume filter",
+          "schema": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        {
+          "name": "min_spread",
+          "in": "query",
+          "required": false,
+          "description": "Minimum spread filter",
+          "schema": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        {
+          "name": "max_spread",
+          "in": "query",
+          "required": false,
+          "description": "Maximum spread filter",
+          "schema": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        {
+          "name": "min_price",
+          "in": "query",
+          "required": false,
+          "description": "Minimum first token price filter",
+          "schema": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        {
+          "name": "max_price",
+          "in": "query",
+          "required": false,
+          "description": "Maximum first token price filter",
+          "schema": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        {
+          "name": "next_cursor",
+          "in": "query",
+          "required": false,
+          "description": "Pagination cursor from previous response",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "page_size",
+          "in": "query",
+          "required": false,
+          "description": "Number of items per page (max 500, values above are capped)",
+          "schema": {
+            "type": "integer",
+            "default": 100,
+            "maximum": 500
+          }
+        }
+      ]
+    },
+    {
+      "api": "clob",
+      "method": "GET",
+      "path": "/rebates/current",
+      "summary": "Get current rebated fees for a maker",
+      "parameters": [
+        {
+          "name": "date",
+          "in": "query",
+          "required": true,
+          "description": "Date in YYYY-MM-DD format",
+          "schema": {
+            "type": "string",
+            "format": "date"
+          }
+        },
+        {
+          "name": "maker_address",
+          "in": "query",
+          "required": true,
+          "description": "Ethereum address of the maker",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    {
+      "api": "clob",
+      "method": "GET",
+      "path": "/builder/trades",
+      "summary": "Get builder trades",
+      "parameters": [
+        {
+          "name": "builder_code",
+          "in": "query",
+          "required": true,
+          "description": "Builder code to fetch attributed trades for",
+          "schema": {
+            "type": "string",
+            "pattern": "^0x[a-fA-F0-9]{64}$"
+          }
+        },
+        {
+          "name": "id",
+          "in": "query",
+          "required": false,
+          "description": "Trade ID to filter by specific trade",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "market",
+          "in": "query",
+          "required": false,
+          "description": "Market (condition ID) to filter trades",
+          "schema": {
+            "type": "string",
+            "pattern": "^0x[a-fA-F0-9]{64}$"
+          }
+        },
+        {
+          "name": "asset_id",
+          "in": "query",
+          "required": false,
+          "description": "Asset ID (token ID) to filter trades",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "before",
+          "in": "query",
+          "required": false,
+          "description": "Filter trades before this Unix timestamp",
+          "schema": {
+            "type": "string",
+            "pattern": "^\\d+$"
+          }
+        },
+        {
+          "name": "after",
+          "in": "query",
+          "required": false,
+          "description": "Filter trades after this Unix timestamp",
+          "schema": {
+            "type": "string",
+            "pattern": "^\\d+$"
+          }
+        },
+        {
+          "name": "next_cursor",
+          "in": "query",
+          "required": false,
+          "description": "Cursor for pagination (base64 encoded offset)",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    {
+      "api": "data",
+      "method": "GET",
+      "path": "/v2/activity",
+      "summary": "List account activity",
+      "parameters": [
+        {
+          "name": "user",
+          "in": "query",
+          "required": false,
+          "description": "Required; the feed is user-anchored.",
+          "schema": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "description": "Page size; default 100, max 1000, past-cap rejected.",
+          "schema": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32",
+            "maximum": 1000,
+            "minimum": 0
+          }
+        },
+        {
+          "name": "cursor",
+          "in": "query",
+          "required": false,
+          "description": "Opaque cursor from a prior response's `next_cursor`; binds the sort\ndirection it was minted under.",
+          "schema": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        {
+          "name": "type",
+          "in": "query",
+          "required": false,
+          "description": "Activity type(s), comma-separated. Accepted values: `TRADE`, `SPLIT`,\n`MERGE`, `REDEEM` (automatic redemptions included), `CONVERSION`,\n`MIGRATION`, `REWARD`, `YIELD`, `MAKER_REBATE`, `TAKER_REBATE`,\n`REFERRAL_REWARD`, `DEPOSIT`, `WITHDRAWAL`, `DIRECTIONAL_SPLIT`,\n`DIRECTIONAL_MERGE`, `THRESHOLD_COMPOSE`, `THRESHOLD_DECOMPOSE`, `TIP`.\nAny other value is rejected with `400`. Omitted, the feed returns every\ntype except `TIP`.\n\n`DEPOSIT` and `WITHDRAWAL` rows are returned only with\n`exclude_deposits_withdrawals=false`. Under its default (`true`) they are\ndropped even when named here, so `type=DEPOSIT` or `type=WITHDRAWAL`\nalone returns an empty page.\n\n`DIRECTIONAL_SPLIT`, `DIRECTIONAL_MERGE`, `THRESHOLD_COMPOSE` and\n`THRESHOLD_DECOMPOSE` are operations on range events, whose outcomes are\nvalue buckets and whose lines are ABOVE / BELOW positions over those\nbuckets. A directional split turns collateral plus the buckets between\ntwo lines into ABOVE the lower line and BELOW the higher one; a\ndirectional merge reverses it. Both are rows of the whole event, so a\n`condition` filter never returns them. A threshold compose turns buckets\ninto one line position and a threshold decompose turns it back; these\nrows carry the line's market and side. Split, merge, redeem and\nconversion on a range event keep `SPLIT`, `MERGE`, `REDEEM` and\n`CONVERSION`.\n\n`TIP` is **opt-in**: it is never in the default set, so it is only\nreturned when you name it here. A tip is a user↔user pUSD transfer that\nis not a trade-settlement leg; `size` is the amount and `side` carries the\ndirection (`IN` received / `OUT` sent).",
+          "schema": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        {
+          "name": "condition",
+          "in": "query",
+          "required": false,
+          "description": "Condition id(s), comma-separated (at most 20 distinct values).\n`condition_id` / `conditionId` are accepted aliases.",
+          "schema": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        {
+          "name": "event_id",
+          "in": "query",
+          "required": false,
+          "description": "Gamma event id(s), comma-separated (at most 20 distinct values);\nresolves to the events' markets. Mutually exclusive with `condition`.",
+          "schema": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        {
+          "name": "side",
+          "in": "query",
+          "required": false,
+          "description": "BUY or SELL.",
+          "schema": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        {
+          "name": "start",
+          "in": "query",
+          "required": false,
+          "description": "Window start on `block_timestamp`, epoch seconds (inclusive). Omitted\nor `0` floors to three years back; pass `start=1` for full history.",
+          "schema": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64"
+          }
+        },
+        {
+          "name": "end",
+          "in": "query",
+          "required": false,
+          "description": "Window end, epoch seconds (inclusive); omitted or `0` means now plus\none day.",
+          "schema": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64"
+          }
+        },
+        {
+          "name": "sort_by",
+          "in": "query",
+          "required": false,
+          "description": "Only `TIMESTAMP` is supported (v2 pages by keyset).",
+          "schema": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        {
+          "name": "sort_direction",
+          "in": "query",
+          "required": false,
+          "description": "`ASC` or `DESC` (default). The keyset seeks in the chosen direction;\nthe minted cursor binds it, so pass it consistently when paging.",
+          "schema": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        {
+          "name": "exclude_deposits_withdrawals",
+          "in": "query",
+          "required": false,
+          "description": "Defaults to `true`, which drops `DEPOSIT` and `WITHDRAWAL` rows from\nthe page, including when `type` names them. Pass `false` to include\nthem.",
+          "schema": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "api": "data",
+      "method": "GET",
+      "path": "/v2/activity/combos",
+      "summary": "List combo activity",
+      "parameters": [
+        {
+          "name": "user",
+          "in": "query",
+          "required": false,
+          "description": "Required; the feed is user-anchored.",
+          "schema": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "description": "First-page size. Ignored when `cursor` is supplied.",
+          "schema": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32",
+            "maximum": 1000,
+            "minimum": 0
+          }
+        },
+        {
+          "name": "cursor",
+          "in": "query",
+          "required": false,
+          "description": "Opaque pagination cursor from a prior response's `next_cursor`.",
+          "schema": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        {
+          "name": "condition",
+          "in": "query",
+          "required": false,
+          "description": "Combo condition id(s), comma-separated (at most 20 distinct values).\n`condition_id` / `conditionId` are accepted aliases.",
+          "schema": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "api": "data",
+      "method": "GET",
+      "path": "/v2/approvals",
+      "summary": "Get wallet approvals",
+      "parameters": [
+        {
+          "name": "user",
+          "in": "query",
+          "required": false,
+          "description": "The proxy wallet whose approval state to return. Required EVM address.",
+          "schema": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "api": "data",
+      "method": "GET",
+      "path": "/v2/biggest-winners",
+      "summary": "List the biggest wins",
+      "parameters": [
+        {
+          "name": "time_period",
+          "in": "query",
+          "required": false,
+          "description": "Window on `resolved_at`: `day` | `week` | `month` | `all`. Defaults to `day`.",
+          "schema": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        {
+          "name": "category",
+          "in": "query",
+          "required": false,
+          "description": "`overall` (default), a Gamma market category (e.g. `sports`), or a\nsynthetic category: `combos` (combinatorial wins get their own full\ntop-500 per window) or `esports` (promoted subcategory).",
+          "schema": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "description": "First-page size. Ignored when `cursor` is supplied.",
+          "schema": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32",
+            "maximum": 1000,
+            "minimum": 0
+          }
+        },
+        {
+          "name": "cursor",
+          "in": "query",
+          "required": false,
+          "description": "Opaque pagination cursor from a prior response's `next_cursor`.",
+          "schema": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "api": "data",
+      "method": "GET",
+      "path": "/v2/builders/leaderboard",
+      "summary": "Get the builders leaderboard",
+      "parameters": [
+        {
+          "name": "time_period",
+          "in": "query",
+          "required": false,
+          "description": "Window: `day` | `week` | `month` | `all`. Defaults to `day`.",
+          "schema": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "description": "First-page size. Ignored when `cursor` is supplied.",
+          "schema": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32",
+            "maximum": 1000,
+            "minimum": 0
+          }
+        },
+        {
+          "name": "cursor",
+          "in": "query",
+          "required": false,
+          "description": "Opaque pagination cursor from a prior response's `next_cursor`.",
+          "schema": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "api": "data",
+      "method": "GET",
+      "path": "/v2/builders/volume",
+      "summary": "Get builder volume over time",
+      "parameters": [
+        {
+          "name": "interval",
+          "in": "query",
+          "required": false,
+          "description": "Bucket width: `day` | `week` | `month` | `all`. Defaults to `day`.\n`timePeriod` and `time_period` are accepted aliases.",
+          "schema": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "description": "How many of the most recent buckets to return. Defaults to 30, capped at\n90; a lower ceiling than the rest of the surface, because only ~308\ndaily buckets exist and the family maximum would return the whole series.\n\nBounds BUCKETS, not rows: a row limit would cut a bucket in half and\nleave a partial period in the series.",
+          "schema": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32",
+            "maximum": 90,
+            "minimum": 0
+          }
+        }
+      ]
+    },
+    {
+      "api": "data",
+      "method": "GET",
+      "path": "/v2/holders",
+      "summary": "List a market's top holders",
+      "parameters": [
+        {
+          "name": "condition",
+          "in": "query",
+          "required": false,
+          "description": "Comma-separated `condition_id`s (at most 20 distinct values; exactly\none with `include_pnl=true`). Required. `condition` is the unified key\nacross v2 (same as the feeds and `/v2/oi`); `condition_id` /\n`conditionId` are accepted aliases.",
+          "schema": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "description": "Rows per outcome token; defaults to 100, maximum 1000 (100 with\n`include_pnl=true`).",
+          "schema": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32",
+            "maximum": 1000,
+            "minimum": 0
+          }
+        },
+        {
+          "name": "cursor",
+          "in": "query",
+          "required": false,
+          "description": "Opaque pagination cursor from a prior response's `next_cursor`; carries\nthe per-token `(limit, offset)` window and overrides `limit`. Paging\npast the first page is cursor-only.",
+          "schema": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        {
+          "name": "min_balance",
+          "in": "query",
+          "required": false,
+          "description": "Minimum net balance in shares (default 0), applied post-netting. With\n`include_pnl=true` it applies to the served per-side gross amount\ninstead.",
+          "schema": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "format": "double"
+          }
+        },
+        {
+          "name": "include_pnl",
+          "in": "query",
+          "required": false,
+          "description": "Opt into per-holder position economics (default `false`; `includePnl`\nis an accepted alias). Adds `avg_price`, `entry_cost_usdc`,\n`current_price`, `current_value`, `realized_pnl`, `unrealized_pnl` and\n`total_pnl` to every holder row, and switches the served amounts to\nper-side gross balances: a wallet holding both outcomes appears under\nboth tokens with per-side sizes and that side's economics, matching\n`/v2/positions` for the same wallet and token. This mode serves one\nmarket's table at a time: exactly one `condition`, `limit` at most 100.",
+          "schema": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "api": "data",
+      "method": "GET",
+      "path": "/v2/leaderboard",
+      "summary": "Get the trader leaderboard",
+      "parameters": [
+        {
+          "name": "time_period",
+          "in": "query",
+          "required": false,
+          "description": "Window: `day` | `week` | `month` | `all`. Defaults to `day`.",
+          "schema": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        {
+          "name": "category",
+          "in": "query",
+          "required": false,
+          "description": "`overall` (default), a Gamma market category (e.g. `sports`), or a\nsynthetic category: `combos` (combinatorial positions; PNL boards only;\nthe volume board has no combos rows) or `esports` (promoted subcategory).",
+          "schema": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        {
+          "name": "sort_by",
+          "in": "query",
+          "required": false,
+          "description": "Which board: `PNL` (default) or `VOLUME`.",
+          "schema": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        {
+          "name": "user",
+          "in": "query",
+          "required": false,
+          "description": "Look up one wallet's standing instead of reading the board. Returns a\nsingle object carrying both ranks, not a page.",
+          "schema": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "description": "First-page size. Ignored when `cursor` is supplied.",
+          "schema": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32",
+            "maximum": 1000,
+            "minimum": 0
+          }
+        },
+        {
+          "name": "cursor",
+          "in": "query",
+          "required": false,
+          "description": "Opaque pagination cursor from a prior response's `next_cursor`.",
+          "schema": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "api": "data",
+      "method": "GET",
+      "path": "/v2/live-volume",
+      "summary": "Get live volume for an event",
+      "parameters": [
+        {
+          "name": "event_id",
+          "in": "query",
+          "required": false,
+          "description": "Event id(s), comma-separated (at most 20 distinct values). Required.\n`event_id` is the unified key across v2 (same as the feeds); `id` and\n`eventId` are accepted aliases.",
+          "schema": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "api": "data",
+      "method": "GET",
+      "path": "/v2/oi",
+      "summary": "Get open interest",
+      "parameters": [
+        {
+          "name": "condition",
+          "in": "query",
+          "required": false,
+          "description": "Condition id(s), comma-separated (at most 20 distinct values).\n`condition` is the unified key across v2 (same as the feeds);\n`condition_id` / `conditionId` are accepted aliases. Omit for global\nopen interest.",
+          "schema": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "api": "data",
+      "method": "GET",
+      "path": "/v2/positions",
+      "summary": "List positions for a user or market",
+      "parameters": [
+        {
+          "name": "user",
+          "in": "query",
+          "required": false,
+          "description": "The wallet to anchor on. At least one of `user`/`condition` is required.",
+          "schema": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        {
+          "name": "condition",
+          "in": "query",
+          "required": false,
+          "description": "Condition id(s), comma-separated (at most 20 distinct values). With\n`user`, narrows that user's positions (all ids honoured). Without\n`user`, anchors on the market's holders; exactly one id is accepted\nthere, and a multi-id list is rejected rather than silently truncated.",
+          "schema": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "description": "First-page size. Ignored when `cursor` is supplied (the cursor's size wins).",
+          "schema": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32",
+            "maximum": 1000,
+            "minimum": 0
+          }
+        },
+        {
+          "name": "cursor",
+          "in": "query",
+          "required": false,
+          "description": "Opaque pagination cursor from a prior response's `next_cursor`. It\ncarries the page position, page size, and the status/sort/direction it\nwas minted under.",
+          "schema": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        {
+          "name": "status",
+          "in": "query",
+          "required": false,
+          "description": "One of `OPEN`, `REDEEMABLE`, `REDEEMABLE_LOST`, `MERGEABLE`, or `CLOSED`;\ndefaults to `OPEN`. `REDEEMABLE_LOST` requires `user`, supports all six\nsorts, and defaults to `CURRENT_VALUE`; it preserves row status\n`REDEEMABLE`. `MERGEABLE` is `OPEN` narrowed to live complementary pairs\n(conditions where the wallet holds >= 2 servable-live tokens) and defaults\nto `TOKENS`; it is user-scoped, so a market-anchored request renders as\n`OPEN`.\n\n`OPEN` is the superset; it includes settled-but-unredeemed winners,\nwhich `REDEEMABLE` narrows to. `CLOSED` is exited positions.",
+          "schema": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        {
+          "name": "event_id",
+          "in": "query",
+          "required": false,
+          "description": "Event id(s), comma-separated (at most 20 distinct values).\nUser-anchored only.",
+          "schema": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        {
+          "name": "title",
+          "in": "query",
+          "required": false,
+          "description": "Case-insensitive market-title substring filter, honoured on every\nanchor and status. SQL LIKE wildcards (`%`, `_`) keep their usual\nmeaning; empty or whitespace-only is treated as absent; at most 200\ncharacters. NOT carried by the cursor: re-send it on every page of a\nwalk (like `condition` and the `start`/`end` window), or the cohort\nsilently widens.",
+          "schema": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        {
+          "name": "filter_type",
+          "in": "query",
+          "required": false,
+          "description": "`CASH` or `TOKENS`; defaults to `TOKENS` (the /v2/trades-homogenized\nfilter pair, replacing the former `size_threshold`).",
+          "schema": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        {
+          "name": "filter_amount",
+          "in": "query",
+          "required": false,
+          "description": "The filter floor. `TOKENS`: minimum CURRENT holding in shares\n(defaults to the 0.1 dust floor; applies to `OPEN`/`REDEEMABLE`; a\nuser's `CLOSED` set is not narrowed by it, and on a market anchor it\nmoves the OPEN/CLOSED boundary). `CASH`: minimum mark-to-market\n`current_value` in USDC, on top of the token dust floor. Invalid\nvalues fall back to the default.",
+          "schema": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "format": "double"
+          }
+        },
+        {
+          "name": "include_archived",
+          "in": "query",
+          "required": false,
+          "description": "Also include positions on archived markets; defaults to `false`.\n`OPEN`/`REDEEMABLE`/`REDEEMABLE_LOST`/`MERGEABLE` only; combining it with\n`status=CLOSED` is rejected. Inactive markets remain excluded either way.",
+          "schema": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          }
+        },
+        {
+          "name": "sort_by",
+          "in": "query",
+          "required": false,
+          "description": "One of `CURRENT_VALUE`, `PRICE`, `TOKENS`, `UNREALIZED_PNL`,\n`REALIZED_PNL`, `TOTAL_PNL`, or `TIMESTAMP` (the row's `last_event_at`).\n`PRICE` ranks by the response's effective `current_price` on every\nsupported anchor and status. On `REDEEMABLE`, the existing winners-first\npartition remains ahead of the requested price order. The default\nfollows the status: `CURRENT_VALUE` for `OPEN`/`REDEEMABLE`,\n`REALIZED_PNL` for `CLOSED`. On a user's `CLOSED` positions, `TOKENS`,\n`CURRENT_VALUE`, `PRICE` and `UNREALIZED_PNL` describe a holding that no\nlonger exists, so those pages are served in `REALIZED_PNL` order.",
+          "schema": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        {
+          "name": "start",
+          "in": "query",
+          "required": false,
+          "description": "Inclusive lower bound on `last_event_at`, epoch seconds; omit or `0` for\nunbounded (the `/v2/activity` + `/v2/trades` vocabulary).",
+          "schema": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64"
+          }
+        },
+        {
+          "name": "end",
+          "in": "query",
+          "required": false,
+          "description": "Inclusive upper bound on `last_event_at`, epoch seconds; omit or `0` for\nunbounded.\n\nA position with no native economics carries no `last_event_at` and is\ntherefore **excluded by any bound**, in either direction; a window asks\nwhich positions moved inside it, and a row with no clock has no answer.\nUnbounded requests still serve those rows.",
+          "schema": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64"
+          }
+        },
+        {
+          "name": "sort_direction",
+          "in": "query",
+          "required": false,
+          "description": "`ASC` or `DESC`; defaults to `DESC`.",
+          "schema": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "api": "data",
+      "method": "GET",
+      "path": "/v2/positions/combos",
+      "summary": "List combo positions",
+      "parameters": [
+        {
+          "name": "user",
+          "in": "query",
+          "required": false,
+          "description": "The wallet to anchor on. Required; combo positions are user-anchored.",
+          "schema": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "description": "First-page size. Ignored when `cursor` is supplied (the cursor's size wins).",
+          "schema": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32",
+            "maximum": 1000,
+            "minimum": 0
+          }
+        },
+        {
+          "name": "cursor",
+          "in": "query",
+          "required": false,
+          "description": "Opaque pagination cursor from a prior response's `next_cursor`.",
+          "schema": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        {
+          "name": "condition",
+          "in": "query",
+          "required": false,
+          "description": "Combo condition id(s), comma-separated (at most 20 distinct values).\n`condition_id` / `conditionId` are accepted aliases.",
+          "schema": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        {
+          "name": "status",
+          "in": "query",
+          "required": false,
+          "description": "One of `OPEN`, `REDEEMABLE`, `PARTIAL`, `RESOLVED_WIN`, `RESOLVED_LOSS`,\n`RESOLVED_PARTIAL`; default (absent) is the held-visibility listing.\n\nAligned with `/v2/positions`: `OPEN` is the superset; it includes\nstill-held redeemable positions; and `REDEEMABLE` narrows to exactly\nthe rows whose `redeemable` flag is `true`. `REDEEMABLE` must be the\nsole value; the other values may be combined comma-separated and keep\nper-value equality semantics.",
+          "schema": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        {
+          "name": "sort_by",
+          "in": "query",
+          "required": false,
+          "description": "`FIRST_ENTRY` (default, except under `status=REDEEMABLE`, which defaults\nto `ENTRY_COST` so the largest claims lead) | `ENTRY_COST` |\n`CURRENT_VALUE` (alias of `ENTRY_COST`) | `UPDATED`. `FIRST_ENTRY DESC`\nand `UPDATED ASC` page by keyset; every other combination pages by an\noffset-shaped cursor. The minted cursor binds sort + direction along\nwith the `status`/`condition` cohort, so a page-2 request needs only\n`?user=` and `?cursor=`; restating a filter is allowed but must agree.",
+          "schema": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        {
+          "name": "sort_direction",
+          "in": "query",
+          "required": false,
+          "description": "`ASC` or `DESC` (default `DESC`).",
+          "schema": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        {
+          "name": "updated_after",
+          "in": "query",
+          "required": false,
+          "description": "Incremental-sync watermark: INCLUSIVE lower bound on `updated_at`,\nepoch seconds. Without a `status` filter, either watermark serves the\nsync view; every live row (mirror-complete), not only the held\nlisting; a `status` filter keeps its own row visibility. The window's\nupper end is always capped by a short stability ceiling (about 90\nseconds behind now), so a bound in the future cannot serve rows that\nmay still move.",
+          "schema": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64"
+          }
+        },
+        {
+          "name": "updated_before",
+          "in": "query",
+          "required": false,
+          "description": "Incremental-sync watermark: INCLUSIVE upper bound on `updated_at`,\nepoch seconds; must not precede `updated_after`. See `updated_after`\nfor the sync-view and ceiling semantics.",
+          "schema": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64"
+          }
+        }
+      ]
+    },
+    {
+      "api": "data",
+      "method": "GET",
+      "path": "/v2/prices-history",
+      "summary": "Get a token's price history",
+      "parameters": [
+        {
+          "name": "token_id",
+          "in": "query",
+          "required": false,
+          "description": "Outcome token id (the CLOB asset id the chart is keyed by). Required.\n`tokenId` is an accepted alias.",
+          "schema": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        {
+          "name": "start",
+          "in": "query",
+          "required": false,
+          "description": "Window start, epoch seconds, INCLUSIVE. Alone it means \"up to the\npresent\", and is capped at 15 days back from now.\n\nPass `end` too when paging: a window that tracks the present keeps\ngrowing at the tip, and the 15-day cap is re-checked on every page, so a\nwalk that starts near the cap can outlive it.",
+          "schema": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64"
+          }
+        },
+        {
+          "name": "end",
+          "in": "query",
+          "required": false,
+          "description": "Window end, epoch seconds, EXCLUSIVE. Requires `start`; on its own it\nwould ask for every point ever recorded up to `end`.",
+          "schema": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64"
+          }
+        },
+        {
+          "name": "interval",
+          "in": "query",
+          "required": false,
+          "description": "Relative window INSTEAD of `start`/`end`: `max`, `all`, `1m`, `1w`,\n`1d`, `6h`, `1h`, matched case-sensitively. An empty `interval=` is a\nmalformed value, not an absent one.\n\n`max`/`all` serve the market's WHOLE life (back to 2022 for the oldest\nmarkets) at 12-hour buckets by default; at `bucket_seconds` of 10800 or\n43200 the window is unbounded, while finer widths keep a 30-day window.\nThe other intervals take a width sized to their own span when\n`bucket_seconds` is omitted (`1h`/`6h`/`1d` 60, `1w` 300, `1m` 1800), and\neach still floors an explicit value: 600 for `max`/`all`/`1m`, 300 for\n`1w`.",
+          "schema": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        {
+          "name": "bucket_seconds",
+          "in": "query",
+          "required": false,
+          "description": "Bucket width in SECONDS (60…86400). `bucketSeconds` is an accepted alias.\n\nOMIT it and the server sizes the width to the window: the finest tier\ngrain (60, 300, 1800, 10800, 43200) that keeps the series under ~2,500\npoints, except that an explicit window wider than 12 hours never\ndefaults to the 60s grain (send `bucket_seconds=60` when you want\nsecond-by-minute detail over a longer window), and coarsened further if\nthat grain no longer reaches the window's start.\nSo a window up to 12 hours keeps 1-minute detail, half a day through a\nweek defaults to 300, fifteen days to 1800; interval presets keep their\nown span-derived defaults (`1d` 60s, `1w` 300, `1m` 1800, and the\nunbounded `max`/`all` 43200).\n\nSEND it and it is served exactly as asked, which for a window older than\nthat resolution's retention means an empty page rather than a silent\nsubstitution. An explicit value is also floored per interval: 600 for\n`max`/`all`/`1m`, 300 for `1w`.",
+          "schema": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64"
+          }
+        },
+        {
+          "name": "as_of",
+          "in": "query",
+          "required": false,
+          "description": "Point-in-time read, epoch seconds, INCLUSIVE: the latest observation at\nor before this instant. Cannot be combined with a window. `asOf` is an\naccepted alias.",
+          "schema": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64"
+          }
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "description": "First-page size; defaults to the cap (10,000). Ignored when `cursor` is\nsupplied (the cursor's size wins).",
+          "schema": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32",
+            "maximum": 10000,
+            "minimum": 0
+          }
+        },
+        {
+          "name": "cursor",
+          "in": "query",
+          "required": false,
+          "description": "Opaque pagination cursor from a prior response's `next_cursor`.",
+          "schema": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "api": "data",
+      "method": "GET",
+      "path": "/v2/resolutions",
+      "summary": "Get resolution state",
+      "parameters": [
+        {
+          "name": "question_id",
+          "in": "query",
+          "required": false,
+          "description": "One UMA question identifier (`0x` plus 64 hexadecimal characters).",
+          "schema": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        {
+          "name": "condition",
+          "in": "query",
+          "required": false,
+          "description": "Comma-separated condition identifiers (at most 20 distinct values): the\nGamma condition id, or the structural condition id that `/v2/activity`\nand `/v2/trades` serve before a market is listed.",
+          "schema": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        {
+          "name": "event_id",
+          "in": "query",
+          "required": false,
+          "description": "Comma-separated positive Gamma event IDs (at most 20 distinct values).",
+          "schema": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "api": "data",
+      "method": "GET",
+      "path": "/v2/status",
+      "summary": "Get data freshness",
+      "parameters": []
+    },
+    {
+      "api": "data",
+      "method": "GET",
+      "path": "/v2/tokens",
+      "summary": "Look up tokens",
+      "parameters": [
+        {
+          "name": "token_id",
+          "in": "query",
+          "required": false,
+          "description": "Token id(s), comma-separated (at most 50 distinct values): decimal\nERC-1155 ids as they appear on receipts and on the `token_id` and\n`asset` fields of the other routes. Elements are trimmed, leading zeros\nstripped and duplicates collapsed to their first position. `token_ids`\nis an accepted alias. Exactly one of `token_id` and `condition` is\nrequired.",
+          "schema": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        {
+          "name": "condition",
+          "in": "query",
+          "required": false,
+          "description": "Condition selector(s), comma-separated (at most 10 distinct values),\neach `0x` followed by 62 or 64 hex digits: a ConditionalTokens\ncondition id (for a market carried over to polymarket-v2, its whole\nfamily), a neg-risk market id (every market of the structure), a\npolymarket-v2 condition id (that condition only), the 66-character\ncondition id of a native polymarket-v2 market, or the on-chain event\nid of a polymarket-v2 neg-risk structure (every question of it).\nElements are trimmed, lower-cased and duplicates collapsed to their\nfirst position. `condition_id` and `conditionId` are accepted aliases.\nExactly one of `token_id` and `condition` is required.",
+          "schema": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "api": "data",
+      "method": "GET",
+      "path": "/v2/trades",
+      "summary": "List trades",
+      "parameters": [
+        {
+          "name": "user",
+          "in": "query",
+          "required": false,
+          "description": "Address to filter by; omit for the market/event/global feed.",
+          "schema": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "description": "First-page size. Ignored when `cursor` is supplied (the cursor's size wins).",
+          "schema": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32",
+            "maximum": 1000,
+            "minimum": 0
+          }
+        },
+        {
+          "name": "cursor",
+          "in": "query",
+          "required": false,
+          "description": "Opaque pagination cursor from a prior response's `next_cursor`.",
+          "schema": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        {
+          "name": "taker_only",
+          "in": "query",
+          "required": false,
+          "description": "Defaults to `true`: each fill is served once, on its taker side.\n`false` includes the maker rows too.",
+          "schema": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          }
+        },
+        {
+          "name": "filter_type",
+          "in": "query",
+          "required": false,
+          "description": "CASH or TOKENS; defaults to TOKENS.",
+          "schema": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        {
+          "name": "filter_amount",
+          "in": "query",
+          "required": false,
+          "description": "Minimum trade size; defaults to 0.01, and 0 means the same.",
+          "schema": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "format": "double"
+          }
+        },
+        {
+          "name": "start",
+          "in": "query",
+          "required": false,
+          "description": "Window start on `block_timestamp`, epoch seconds (inclusive); honored\non the `user` shape only. Omitted or `0` floors to three years back;\n`start=1` asks for full history. The `condition`/`event_id` shapes\nserve a fixed three-year window and the bare feed the rolling\ncurrent-plus-previous month, ignoring both bounds.",
+          "schema": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64"
+          }
+        },
+        {
+          "name": "end",
+          "in": "query",
+          "required": false,
+          "description": "Window end, epoch seconds (inclusive); honored on the `user` shape\nonly; omitted or `0` means now plus one day.",
+          "schema": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64"
+          }
+        },
+        {
+          "name": "condition",
+          "in": "query",
+          "required": false,
+          "description": "Condition id(s), comma-separated (at most 20 distinct values).\n`condition_id` / `conditionId` are accepted aliases.",
+          "schema": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        {
+          "name": "event_id",
+          "in": "query",
+          "required": false,
+          "description": "Event id(s), comma-separated (at most 20 distinct values).",
+          "schema": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        {
+          "name": "side",
+          "in": "query",
+          "required": false,
+          "description": "BUY or SELL.",
+          "schema": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "api": "data",
+      "method": "GET",
+      "path": "/v2/user-pnl",
+      "summary": "Get a user's PnL series",
+      "parameters": [
+        {
+          "name": "user",
+          "in": "query",
+          "required": false,
+          "description": "Proxy wallet. The `user_address` spelling is accepted as an alias.",
+          "schema": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        {
+          "name": "interval",
+          "in": "query",
+          "required": false,
+          "description": "Window: `max`, `all`, `1m`, `1w`, `1d`, `12h`, or `6h`. Defaults to `1d`.",
+          "schema": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        {
+          "name": "fidelity",
+          "in": "query",
+          "required": false,
+          "description": "Output grid: `1d`, `18h`, `12h`, `3h`, or `1h`. Defaults to `1h`.",
+          "schema": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "api": "data",
+      "method": "GET",
+      "path": "/v2/user-stats",
+      "summary": "Get a user's profile stats",
+      "parameters": [
+        {
+          "name": "user",
+          "in": "query",
+          "required": false,
+          "description": "The wallet whose profile stats to return. Required; `0x` followed by\n40 hexadecimal characters.",
+          "schema": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "api": "data",
+      "method": "GET",
+      "path": "/v2/user-volume",
+      "summary": "Get a user's trading volume",
+      "parameters": [
+        {
+          "name": "user",
+          "in": "query",
+          "required": false,
+          "description": "The wallet whose volume to return. Required.",
+          "schema": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        {
+          "name": "start",
+          "in": "query",
+          "required": false,
+          "description": "Window start, epoch seconds, inclusive. Omitted or `0` disables the\nbound (the feeds' convention). Volume is tracked in whole UTC days, so\nthe bound is floored to its UTC day.",
+          "schema": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64"
+          }
+        },
+        {
+          "name": "end",
+          "in": "query",
+          "required": false,
+          "description": "Window end, epoch seconds, inclusive, floored to its UTC day. Omitted\nor `0` disables the bound.",
+          "schema": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64"
+          }
+        }
+      ]
+    },
+    {
+      "api": "data",
+      "method": "GET",
+      "path": "/v2/value",
+      "summary": "Get portfolio value",
+      "parameters": [
+        {
+          "name": "user",
+          "in": "query",
+          "required": false,
+          "description": "The wallet whose portfolio value to return. Required.",
+          "schema": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        {
+          "name": "condition",
+          "in": "query",
+          "required": false,
+          "description": "Comma-separated `condition_id`s (at most 20 distinct values); omit for\nthe full portfolio.",
+          "schema": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

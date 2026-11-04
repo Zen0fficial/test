@@ -15,6 +15,7 @@ import json
 import os
 import re
 import time
+from email.utils import parsedate_to_datetime
 from typing import Any, Iterable, Mapping, Optional, Sequence
 from urllib.error import HTTPError, URLError
 from urllib.request import HTTPRedirectHandler, Request, build_opener
@@ -36,6 +37,10 @@ ALLOWED_CONFIDENCE = {"high", "medium", "low"}
 
 class DeepSeekExtractionError(RuntimeError):
     """A safe, non-secret-bearing DeepSeek API or response error."""
+
+    def __init__(self, message, *, retry_after=None):
+        super().__init__(message)
+        self.retry_after = retry_after
 
 
 class _NoRedirect(HTTPRedirectHandler):
@@ -167,8 +172,8 @@ class DeepSeekExtractor:
             raise DeepSeekExtractionError("Invalid DeepSeek model name.")
         if not 1 <= timeout <= 300 or not 1000 <= chunk_chars <= 24000 or not chunk_chars <= batch_chars <= 32000:
             raise DeepSeekExtractionError("DeepSeek extractor bounds are invalid.")
-        if not 128 <= max_output_tokens <= 24000:
-            raise DeepSeekExtractionError("max_output_tokens must be between 128 and 24000.")
+        if not 128 <= max_output_tokens <= 65536:
+            raise DeepSeekExtractionError("max_output_tokens must be between 128 and 65536.")
         self._api_key = credential.strip()
         self.model = model
         self.timeout = timeout
@@ -181,17 +186,28 @@ class DeepSeekExtractor:
         source_texts = {item["item_id"]: item["text"] for item in items}
         user_payload = [{"item_id": item["item_id"], "source_type": item["source_type"], "text": item["text"]}
                         for item in items]
-        body = json.dumps({
+        payload, metadata = self.request_json([
+            {"role": "system", "content": _system_prompt()},
+            {"role": "user", "content": "Return the requested json extraction for these source items:\n" +
+             json.dumps(user_payload, ensure_ascii=False)},
+        ])
+        return _validate_payload(payload, set(source_texts), source_texts), metadata
+
+    def request_json(self, messages: Sequence[Mapping[str, str]], *, reasoning_effort: Optional[str] = None) -> tuple[Any, dict[str, Any]]:
+        """Shared bounded JSON-mode transport; callers validate their own schema."""
+        if reasoning_effort is not None and reasoning_effort not in ("low", "high", "max"):
+            raise DeepSeekExtractionError("Invalid DeepSeek reasoning effort.")
+        request_body = {
             "model": self.model,
-            "messages": [
-                {"role": "system", "content": _system_prompt()},
-                {"role": "user", "content": "Return the requested json extraction for these source items:\n" +
-                 json.dumps(user_payload, ensure_ascii=False)},
-            ],
+            "messages": list(messages),
             "response_format": {"type": "json_object"},
             "max_tokens": self.max_output_tokens,
             "stream": False,
-        }, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
+        }
+        if reasoning_effort is not None:
+            request_body["reasoning_effort"] = reasoning_effort
+            request_body["thinking"] = {"type": "enabled"}
+        body = json.dumps(request_body, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
         request = Request(API_URL, data=body, headers={
             "Authorization": "Bearer " + self._api_key,
             "Content-Type": "application/json",
@@ -204,7 +220,20 @@ class DeepSeekExtractor:
                     raise DeepSeekExtractionError("DeepSeek response exceeded the configured size bound.")
                 status = getattr(response, "status", 200)
         except HTTPError as error:
-            raise DeepSeekExtractionError("DeepSeek API returned HTTP " + str(error.code) + ".") from None
+            hint = error.headers.get("Retry-After", "") if error.headers else ""
+            retry_after = None
+            try:
+                retry_after = float(hint)
+            except ValueError:
+                try:
+                    retry_after = (parsedate_to_datetime(hint) - dt.datetime.now(dt.timezone.utc)).total_seconds()
+                except (ValueError, TypeError, OverflowError):
+                    pass
+            if retry_after is not None and not 0 <= retry_after < float("inf"):
+                retry_after = None
+            status_code = error.code
+            error.close()
+            raise DeepSeekExtractionError("DeepSeek API returned HTTP " + str(status_code) + ".", retry_after=retry_after) from None
         except (URLError, TimeoutError, OSError) as error:
             raise DeepSeekExtractionError("DeepSeek API request failed: " + type(error).__name__ + ".") from None
         if status != 200:
@@ -220,10 +249,8 @@ class DeepSeekExtractor:
             payload = json.loads(content)
         except (UnicodeError, ValueError, KeyError, IndexError, TypeError):
             raise DeepSeekExtractionError("DeepSeek returned empty, truncated, or malformed JSON output.") from None
-        expected = set(source_texts)
-        validated = _validate_payload(payload, expected, source_texts)
         usage = response_body.get("usage")
-        return validated, {
+        return payload, {
             "response_id": response_body.get("id"),
             "model_returned": response_body.get("model"),
             "finish_reason": finish_reason,

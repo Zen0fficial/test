@@ -2,6 +2,7 @@ import io
 import json
 import os
 import unittest
+from urllib.error import HTTPError
 from unittest.mock import patch
 
 from futu_bridge.deepseek_extractor import DeepSeekExtractionError, DeepSeekExtractor, extract_jsonl
@@ -35,6 +36,15 @@ class FakeOpener:
 
 
 class DeepSeekExtractorTests(unittest.TestCase):
+    def test_rate_limit_retains_safe_retry_after(self):
+        opener = FakeOpener(b'')
+        extractor = DeepSeekExtractor(api_key="fixture-private-key", opener=opener)
+        with patch.object(opener, "open", side_effect=HTTPError("https://api.deepseek.com/chat/completions", 429, "rate limit", {"Retry-After":"7"}, None)):
+            with self.assertRaises(DeepSeekExtractionError) as caught:
+                extractor.request_json([{"role":"user","content":"json"}])
+        self.assertEqual(caught.exception.retry_after, 7)
+        self.assertNotIn("fixture-private-key", str(caught.exception))
+
     def event(self):
         return make_event(
             instrument="US.AAPL", source_type="report_pdf_page", source_id="report",

@@ -6,8 +6,6 @@ import time
 from .provider import ProviderError, ProviderResult
 from .short_wire import MAX_TIMESTAMP, parse_daily_short_volume
 
-SHORT_MODULE_SHA256 = '899db0ccb14c1f4d818db87f976d4a0dd3994ba751687ed4d72e04c51e72bb33'
-
 
 def _date_bound(value):
     if value is None:
@@ -69,7 +67,7 @@ class NativeShortVolumeMixin:
                       frequency='daily',quantity_unit='shares',no_more_data=not parsed['has_more'])
         source = self._source('daily_short_volume')
         source.update(protocol=6699 if market == 'US' else 6379,request_id=requested.get('request_id'),
-                      kind='daily_short_volume',short_module_sha256=SHORT_MODULE_SHA256,live_push=False,
+                      kind='daily_short_volume',short_module_sha256=self.calendar_module_sha256,live_push=False,
                       entitlement='server-enforced desktop-session permissions',
                       description='Daily short-selling statistics requested through the running Futu desktop session.',
                       coverage=('NYSE and Nasdaq and their affiliates, as supplied by Futu; not an all-venue short-sale total.'

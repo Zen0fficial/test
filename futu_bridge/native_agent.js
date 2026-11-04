@@ -1,4 +1,4 @@
-// Read-only getters validated against QotBase.dll in Futu 16.33.17808.
+// Read-only getters for the exact desktop build selected by the Python loader.
 // Python verifies the on-disk SHA-256 before attachment. No hooks or subscriptions.
 var api = {};
 var qotModule = Process.getModuleByName('QotBase.dll');
@@ -20,7 +20,7 @@ for (const field of ['PriceNominal', 'PriceLastClose', 'ExchangeTime', 'ServerTi
 }
 
 api.initialize = function() {
-    return {module_path: qotModule.path, architecture: Process.arch,
+    return {module_path: qotModule.path, desktop_version: nativeBuild.version, architecture: Process.arch,
         pointer_size: Process.pointerSize, price_mode: 1, readonly: true,
         transport_module_path: typeof historyCoreModule !== 'undefined' ? historyCoreModule.path : null,
         methods: Object.keys(api)};

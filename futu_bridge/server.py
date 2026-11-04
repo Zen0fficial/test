@@ -166,7 +166,7 @@ class MarketDataServer(ThreadingHTTPServer):
     daemon_threads = True
     allow_reuse_address = True
 
-    def __init__(self, address, provider=None, sample_path=DEFAULT_SAMPLE, token=None):
+    def __init__(self, address, provider=None, sample_path=DEFAULT_SAMPLE, token=None, polymarket=True):
         if not ipaddress.ip_address(address[0]).is_loopback:
             raise ValueError("This service must bind to a loopback IP address.")
         if ":" in address[0]:
@@ -174,6 +174,8 @@ class MarketDataServer(ThreadingHTTPServer):
         self.provider = provider or UnavailableProvider()
         self.samples = SampleBars(sample_path)
         self.token = token
+        from .polymarket import PolymarketClient
+        self.polymarket = PolymarketClient() if polymarket is True else (polymarket or None)
         self._resource_lock = threading.Lock()
         self._connections = set()
         self._subscriptions = {}
@@ -222,6 +224,8 @@ class MarketDataServer(ThreadingHTTPServer):
                 pass
             connection.close()
         super().server_close()
+        if self.polymarket is not None:
+            self.polymarket.close()
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -288,6 +292,10 @@ class Handler(BaseHTTPRequestHandler):
             split = urlsplit(self.path)
             if len(self.path) > 16384:
                 raise ProviderError("invalid_query", "Request URL is too long.", 414)
+            if split.path == "/v1/polymarket" or split.path.startswith("/v1/polymarket/"):
+                from .polymarket_http import handle_get
+                handle_get(self, split, request_id)
+                return
             query = Query(split.query)
             provider = self.server.provider
             if split.path == "/health":
@@ -297,12 +305,16 @@ class Handler(BaseHTTPRequestHandler):
                                          "version": __version__, "read_only": True,
                                          "provider": caps.get("provider", provider.name),
                                          "provider_connected": caps.get("connected", False),
+                                         "resources": {"futu": caps.get("connected", False),
+                                                       "polymarket": self.server.polymarket is not None},
                                          "served_at": now()})
                 return
             if split.path == "/v1/capabilities":
                 query.only()
                 self.json_response(200, {"request_id": request_id, "served_at": now(),
                                          "read_only": True, "market_data": provider.capabilities(),
+                                         "resources": {"polymarket": {"enabled": self.server.polymarket is not None,
+                                                                       "catalog": "/v1/polymarket/catalog"}},
                                          "samples": self.server.samples.metadata()})
                 return
             if split.path == "/v1/quotes":
@@ -449,7 +461,23 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         self.close_connection = True
-        self.error_response(ProviderError("method_not_allowed", "This is a read-only GET API.", 405), str(uuid.uuid4()))
+        request_id = str(uuid.uuid4())
+        try:
+            self.authorize()
+            split = urlsplit(self.path)
+            if len(self.path) > 16384:
+                raise ProviderError("invalid_query", "Request URL is too long.", 414)
+            if self.command != "POST" or not split.path.startswith("/v1/polymarket/"):
+                raise ProviderError("method_not_allowed", "Only read-only Polymarket batch and GraphQL POSTs are accepted.", 405)
+            from .polymarket_http import handle_post
+            handle_post(self, split, request_id)
+        except ProviderError as error:
+            self.error_response(error, request_id)
+        except (BrokenPipeError, ConnectionResetError):
+            pass
+        except Exception as exc:
+            self.log_message("Read request failed: %s", type(exc).__name__)
+            self.error_response(ProviderError("internal_error", "The data read failed unexpectedly.", 500), request_id)
 
     do_PUT = do_DELETE = do_PATCH = do_POST
 
@@ -461,6 +489,7 @@ def main(argv=None):
     parser.add_argument("--provider", help="Importable trusted Python module:factory")
     parser.add_argument("--sample-path", type=Path, default=DEFAULT_SAMPLE)
     parser.add_argument("--token-env", help="Environment variable containing an optional bearer token")
+    parser.add_argument("--disable-polymarket", action="store_true", help="Disable public Polymarket data routes")
     args = parser.parse_args(argv)
     token = None
     if args.token_env:
@@ -470,7 +499,8 @@ def main(argv=None):
     provider = load_provider(args.provider)
     server = None
     try:
-        server = MarketDataServer((args.host, args.port), provider, args.sample_path, token)
+        server = MarketDataServer((args.host, args.port), provider, args.sample_path, token,
+                                  polymarket=not args.disable_polymarket)
         print(f"Futu read-only local API listening on {args.host}:{server.server_port}", flush=True)
         server.serve_forever()
     except KeyboardInterrupt:

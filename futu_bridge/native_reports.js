@@ -9,7 +9,7 @@ function reportFinish(pending, result) {
     pending.resolve(Object.assign({protocol:20846, channel:1, request_id:pending.requestId,
         request:pending.metadata, readonly:true}, result));
 }
-var reportReplyObserver = Interceptor.attach(historyCoreModule.base.add(0xa4f80), {
+var reportReplyObserver = Interceptor.attach(historyTransportReplyAddress, {
     onEnter(args) {
         const pending=reportPending;
         if (!pending || pending.requestId===null) return;

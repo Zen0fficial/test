@@ -7,7 +7,6 @@ interval. Neither reconnect nor a current book snapshot constitutes tick replay.
 
 import ctypes
 from ctypes import wintypes
-import hashlib
 import threading
 import uuid
 
@@ -240,7 +239,7 @@ class NativePushMixin:
                     self._push_cleanup_warnings[:] = self._push_cleanup_warnings[-16:]
 
     def _reconnect_push_context(self, context):
-        from .native import _frida, QOTBASE_SHA256, COREBIZ_SHA256
+        from .native import _frida
         with self._push_lifecycle_lock:
             if self._closed:
                 raise ProviderError("desktop_disconnected", "The desktop provider is closed.", 503)
@@ -250,9 +249,7 @@ class NativePushMixin:
                 return self._start_push_context(context, reconnect=True)
             if self._capture_process_identity() != self._process_started:
                 raise ProviderError("desktop_process_changed", "Futu restarted; create a new client and rediscover option identities.", 503)
-            if (hashlib.sha256(self.module_path.read_bytes()).hexdigest() != QOTBASE_SHA256 or
-                    hashlib.sha256(self.core_module_path.read_bytes()).hexdigest() != COREBIZ_SHA256):
-                raise ProviderError("version_unsupported", "Desktop modules changed before reconnect.", 503)
+            self._verify_build_files()
             contexts = self._push_context_list()
             if not any(item is context for item in contexts):
                 contexts.append(context)

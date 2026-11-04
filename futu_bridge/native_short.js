@@ -10,7 +10,7 @@ function shortFinish(pending, fields) {
         request_id: pending.requestId, request: pending.metadata,
         source_kind: 'desktop_session_daily_short_volume_request', readonly: true}, fields));
 }
-var shortReplyObserver = Interceptor.attach(historyCoreModule.base.add(0xa4f80), {
+var shortReplyObserver = Interceptor.attach(historyTransportReplyAddress, {
     onEnter(args) {
         const pending = shortPending;
         if (!pending || pending.requestId === null) return;

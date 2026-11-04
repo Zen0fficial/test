@@ -1,4 +1,4 @@
-// Native desktop market push, Futu 16.33.17808 only (loader verifies hashes).
+// Native desktop market push for the loader's hash-verified build profile.
 // Sub/UnSub use a dedicated generated handle; never unsubscribe UI handles.
 // Observe only the public market-data callback, without changing arguments.
 var pushGenerateHandle = new NativeFunction(exportAddress('?GenerateHandle@INNBiz_Qot_PushQot@@'), 'uint64', []);

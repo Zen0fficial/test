@@ -33,7 +33,7 @@ function feedFinish(pending, fields) {
 
 // Exact request-ID/protocol filtering occurs before reading any payload. This is
 // the normal receive callback; no application arguments or return values change.
-var feedReplyObserver = Interceptor.attach(historyCoreModule.base.add(0xa4f80), {
+var feedReplyObserver = Interceptor.attach(historyTransportReplyAddress, {
     onEnter(args) {
         const pending = feedPending;
         if (!pending || pending.requestId === null) return;
