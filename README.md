@@ -10,6 +10,29 @@ Polymarket is a second independent data resource: Gamma discovery, CLOB books
 and prices, Data API v2 history and analytics, live WebSockets, and on-chain
 data access. Both sources share one local service. See [Polymarket usage](docs/polymarket.md).
 
+Optional [platform-specific converters](docs/platform-converters.md) let
+**Qlib, NautilusTrader and locally built LEAN** consume the same fixed provider
+responses in separate runtimes. The existing providers and Qlib exporter remain
+unchanged. Actual local-data replay checks cover US equity minute bars and
+Polymarket probability history, including timestamps and precision. Trading
+remains manual; platform tests only observe data and submit no simulated or
+live orders.
+
+[Continuous HK.00700 feeds](docs/live-platform-feeds.md) connect the same local
+native push stream to NautilusTrader's live data client and LEAN's live data
+queue. Both receive native trade and best bid/ask ticks, retry disconnected
+streams, and retain source-to-callback evidence. Run both on the prepared machine:
+
+```powershell
+& .\scripts\run_live_platforms.ps1
+```
+
+The optional [HK.00700 ML baseline](docs/ml-baseline.md) uses daily Futu data to
+estimate next-observed-day closing-price direction. It saves inspectable
+predictions and JSON model parameters for manual review, with chronological
+holdout evaluation and no order placement. The first model did not demonstrate
+a useful improvement over its constant probability baseline.
+
 The Futu desktop application itself is not part of this repository. Run the
 bridge against a locally installed, signed-in Futu desktop session. Version
 0.4.0 supports Windows x64 desktop builds **16.33.17808** and **16.37.27308**,

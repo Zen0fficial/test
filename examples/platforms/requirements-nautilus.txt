@@ -1,0 +1,16 @@
+# Isolated Python 3.13 environment; never install into the Qlib environment.
+# Versions used for the November 2026 compatibility verification.
+nautilus-trader==1.231.0
+click==8.5.0
+colorama==0.4.6
+fsspec==2026.2.0
+msgspec==0.22.0
+numpy==2.5.4
+pandas==3.1.1
+portion==2.6.3
+pyarrow==26.0.1
+python-dateutil==4.0.0
+pytz==2026.6
+sortedcontainers==2.4.0
+tqdm==4.70.1
+tzdata==2026.6
