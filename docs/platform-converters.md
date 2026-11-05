@@ -149,6 +149,9 @@ Existing Qlib commands and previously exported data continue to work.
 Keep the existing local API running on port 8765. The current Futu service is
 unchanged and still enforces its desktop session permissions.
 
+The platform test runner and added regression tests are kept locally and are
+not distributed in the repository. On the prepared development machine:
+
 ```powershell
 & .\scripts\test_platforms.ps1 `
   -CapturePath output/platform_compatibility/capture_20261102_03
@@ -177,7 +180,7 @@ conversion; it is not a replacement for the existing full-history exporter.
 
 ## Runtime setup
 
-The tested machine already has the three isolated runtimes. The runner accepts
+The tested machine already has the three isolated runtimes. The local-only runner accepts
 `-QlibPython`, `-NautilusPython`, `-DotNet`, `-QlibSource`, and `-LeanSource` paths.
 For another machine:
 

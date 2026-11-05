@@ -114,7 +114,8 @@ probability_up = predict_portable(model, features(bars).iloc[-1])
 Portable inference matches scikit-learn to an absolute tolerance of `1e-12`.
 Nine ML regressions check future-data isolation, target alignment, boundary
 purging, training-only scaling, portability, and invalid inputs. The full
-suite passed 124 tests.
+suite passed 124 tests. The added regression tests are retained locally and
+are not distributed in the repository.
 
 Raw price direction includes corporate-action price effects and is not total
 return. The provider does not certify every trading date, so the target is the

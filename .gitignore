@@ -12,3 +12,9 @@ tmp/
 .env.*
 !.env.example
 *.log
+
+# Platform and ML tests are kept locally, outside published updates.
+/futu_bridge/tests/test_live_converters.py
+/futu_bridge/tests/test_ml_baseline.py
+/futu_bridge/tests/test_platform_converters.py
+/scripts/test_platforms.ps1
