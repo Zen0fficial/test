@@ -33,6 +33,11 @@ predictions and JSON model parameters for manual review, with chronological
 holdout evaluation and no order placement. The first model did not demonstrate
 a useful improvement over its constant probability baseline.
 
+The [joint research framework](docs/joint-framework.md) provides one API for
+native replay, continuous data feeds, Qlib features, causal Futu/Polymarket
+alignment, and the manual-review ML baseline. It preserves the fixed providers
+and isolated runtimes, with explicit backend selection and auditable results.
+
 The Futu desktop application itself is not part of this repository. Run the
 bridge against a locally installed, signed-in Futu desktop session. Version
 0.4.0 supports Windows x64 desktop builds **16.33.17808** and **16.37.27308**,

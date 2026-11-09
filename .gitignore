@@ -18,3 +18,4 @@ tmp/
 /futu_bridge/tests/test_ml_baseline.py
 /futu_bridge/tests/test_platform_converters.py
 /scripts/test_platforms.ps1
+/futu_bridge/tests/test_joint.py

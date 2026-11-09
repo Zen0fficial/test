@@ -74,9 +74,11 @@ async def run(base_url, symbol, output, seconds=0, disconnect_after=0):
         async def pump(self):
             while self.active or not stream.events.empty():
                 try:
-                    envelope = stream.events.get_nowait()
+                    # Wake on data arrival instead of adding up to 10 ms of
+                    # polling latency. A bounded wait also permits shutdown
+                    # when the market is quiet; the event loop never blocks.
+                    envelope = await asyncio.to_thread(stream.events.get, True, 0.1)
                 except queue.Empty:
-                    await asyncio.sleep(0.01)
                     continue
                 try:
                     for row in selector.select(envelope):
