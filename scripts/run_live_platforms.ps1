@@ -15,8 +15,8 @@ try {
     if ($Seconds -gt 0 -and $DisconnectAfter -gt 0 -and $Seconds -lt $DisconnectAfter + 20) {
         throw 'Allow at least 20 seconds of live activity after the forced disconnect.'
     }
-    $qlib = (Resolve-Path '.venv-qlib/Scripts/python.exe').Path
-    $nautilus = (Resolve-Path '.venv-nautilus/Scripts/python.exe').Path
+    $qlib = (Resolve-Path '.venv-joint/Scripts/python.exe').Path
+    $nautilus = $qlib
     $dotnet = (Resolve-Path 'tmp/dotnet/dotnet.exe').Path
     $lean = (Resolve-Path 'tmp/lean-src').Path
     if (Test-Path -LiteralPath $OutputRoot) { throw 'Choose a new output folder to preserve earlier evidence.' }

@@ -2,8 +2,15 @@
 
 The existing local Futu and Polymarket providers are the data boundary. Their
 implementations, APIs, schemas, source selection, and the old Qlib exporter are
-unchanged. Each platform has its own converter and runtime. A platform does not
+unchanged. Each platform has its own converter. Qlib, Nautilus, and MLflow now
+share the [pinned Python research environment](shared-runtime.md); LEAN uses .NET.
+The November 5 results below describe the earlier isolated setup. A platform does not
 replace a provider or require another market-data subscription.
+
+The [native execution converters](native-execution.md) additionally map captured
+HK.00700 minute opens into Qlib's full nested exchange and native simulated
+orders in NautilusTrader and LEAN. These are explicitly offline simulations;
+the continuous live data observers remain data-only.
 
 ```mermaid
 flowchart LR
@@ -13,8 +20,8 @@ flowchart LR
     R --> Q[Qlib converter: CSV and bin]
     R --> N[Nautilus converter: native bars and custom data]
     R --> L[LEAN converter: equity files and custom data]
-    Q --> QP[Qlib: existing Python environment]
-    N --> NP[NautilusTrader: isolated Python environment]
+    Q --> PY[Shared pinned Python: Qlib, Nautilus, MLflow]
+    N --> PY
     L --> LP[LEAN: local .NET runtime]
 ```
 
@@ -70,8 +77,9 @@ new DeepSeek requests were made. No additional market-data providers were added.
 
 `futu_bridge.converters.nautilus` targets the **stable 1.231.x API**. The 2.x
 release candidate has a different Python API and is rejected explicitly by
-this converter. Keep its dependencies in `.venv-nautilus`; do not upgrade the
-Qlib environment to meet Nautilus requirements.
+this converter. Use `.venv-joint` with the full shared dependency lock, rather
+than resolving Qlib and Nautilus dependencies separately. The original provider
+environment remains unchanged.
 
 Futu rows become native `Equity`/`Bar` objects. Nine decimal price places retain
 source precision; this is simulation precision, not a verified exchange order
@@ -82,8 +90,9 @@ Polymarket history becomes custom data keyed by the exact outcome token string.
 The history timestamp and conservative bucket-end delivery time are separate.
 The probe uses the actual backtest engine to replay data and checks every
 callback. It submits no orders and verifies that the engine's order count
-remains zero. Trading is manual; simulated and live execution tests are outside
-this project's scope. No live data/execution client is constructed by this
+remains zero. Trading is manual; this observer does not simulate execution.
+The separate [artificial portfolio](ml-comparison.md) records local cash/fees.
+No live data/execution client is constructed by this
 historical observer.
 
 ### LEAN

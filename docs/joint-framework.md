@@ -1,10 +1,15 @@
 # Joint research framework
 
-`futu_bridge.joint` is a read-only composition layer for the existing Qlib,
+`futu_bridge.joint` is a research composition layer for the existing Qlib,
 NautilusTrader, LEAN, and ML implementations. It gives applications one Python
-API and CLI while preserving separate runtimes and fixed local Futu/Polymarket
-providers. Trading remains manual. There is no execution capability in its
-public interface.
+API and CLI with fixed local Futu/Polymarket providers. Qlib, NautilusTrader,
+and MLflow now share [one pinned Python environment](shared-runtime.md); LEAN
+retains .NET. Trading remains manual. The optional artificial portfolio only
+records local fills and cash; no interface routes real orders.
+
+[Native execution](native-execution.md) now complements the custom portfolio
+ledger: `simulate-native` compares Qlib, Nautilus and LEAN native accounts, while
+`train-qlib-nested` trains native PPO/DQN through the full nested HK simulator.
 
 ## Implementation decisions
 
@@ -13,12 +18,16 @@ public interface.
 | Provider access and immutable capture | Existing local API and capture format | Preserve source selection, permissions, response bytes, and hashes |
 | Historical event replay | Nautilus first, LEAN if unavailable | Existing exact-decimal native bars and event callbacks; backend selected before work starts |
 | Independent replay verification | LEAN | A separately implemented C# reader checks the same timestamps, decimals, calendars, and custom probability data |
-| Compact batch storage | Qlib | Retains the existing CSV/bin workflow and compatible research environment |
-| Batch expressions | Qlib plus shared gap policy | Use native `Ref` and `Mean`; explicitly mask warm-up after session/missing-bar gaps |
+| Canonical analytical storage | Parquet/Arrow with SQLite publication control | Immutable versions, exact decimals, source lineage, backup and rollback; legacy Qlib bin remains a derived compatibility format |
+| Common gap-aware features | Correctness-qualified NumPy profile; native Qlib for broader expressions | Equivalent-workload benchmarks select the common three-feature implementation; native `Ref`/`Mean` and the wider expression language remain available |
 | Feature correctness reference | New Decimal implementation | Independently check Qlib's float32-derived features against original provider values |
 | Futu/Polymarket time alignment | New shared implementation | Join on availability, reject ambiguous duplicates, preserve token IDs, and enforce maximum staleness |
 | Continuous HK.00700 data | LEAN default; Nautilus fallback/selectable | Both passed native tick/reconnect checks; LEAN had lower observed local callback delay |
-| ML research | Existing scikit-learn baseline | Retain chronological splits, label purging, portable model files, and manual review |
+| ML research | Preserved baseline plus Qlib LightGBM and regularized logistic candidates | Frozen splits, validation-only selection, portable/native saved models |
+| Experiment tracking | MLflow with local SQLite | Native Qlib recorder; metric and artifact round-trip verification |
+| Artificial portfolio | Shared Decimal fee and cash ledger | IBKR Tiered/HK charges, whole lots, causal timing, no leverage or order routing |
+| Native simulated execution | Qlib nested HK, Nautilus matching, LEAN equity fills | Shared captured prices, independently audited fills/fees/cash; versioned order matrices and explicit backend differences |
+| Local task workflows | Native Qlib trainers with a joint SQLite/Parquet TaskManager | Fenced claims, monotonic leases, retry policy, serialized MLflow reconciliation and quiescent backup; MongoDB service not required |
 
 These are suitability decisions for the implemented workloads, not a claim that
 one framework is universally fastest. Full-process wall times include different
@@ -89,8 +98,9 @@ report = research.history(
 
 `RuntimePaths` can also be constructed with explicit executable/source paths
 on another machine. Importing the joint package starts no service and imports
-none of the optional engines. Frameworks execute in their own environments,
-so installing a new framework does not upgrade Qlib's dependencies.
+none of the optional engines. Qlib and Nautilus workers execute in the same
+pinned environment. The local provider keeps its original environment;
+dependency changes are tested without changing the provider.
 
 `history(..., verify_all=True)` requires all three runtime prerequisites.
 With `verify_all=False`, the capability policy can select an available replay
@@ -106,21 +116,21 @@ Run from the repository root with the existing prepared environments:
 
 ```powershell
 # Same immutable real capture through both replay engines and Qlib.
-.\.venv-qlib\Scripts\python.exe -m futu_bridge.joint history `
+.\.venv-joint\Scripts\python.exe -m futu_bridge.joint history `
   --capture output/platform_compatibility/capture_20261102_03 `
   --output output/joint/new-history-run --allow-retrospective
 
 # Continuous HK.00700 data through the selected native live client.
-.\.venv-qlib\Scripts\python.exe -m futu_bridge.joint live `
+.\.venv-joint\Scripts\python.exe -m futu_bridge.joint live `
   --output output/joint/new-live-run
 
 # Bounded live verification, including converter-only reconnection.
-.\.venv-qlib\Scripts\python.exe -m futu_bridge.joint live `
+.\.venv-joint\Scripts\python.exe -m futu_bridge.joint live `
   --output output/joint/new-live-check --seconds 60 --disconnect-after 15
 
 # Choose Nautilus explicitly: add --backend nautilus to either live command.
 # Reproduce the daily model using the saved real provider response.
-.\.venv-qlib\Scripts\python.exe -m futu_bridge.joint model `
+.\.venv-joint\Scripts\python.exe -m futu_bridge.joint model `
   --output output/joint/new-model-run `
   --response output/ml/hk00700_baseline_20261105/provider_response.json `
   --start 2020-01-01 --end 2026-11-04
@@ -137,8 +147,10 @@ Historical outputs include `input/`, per-engine artifacts/logs,
 `reference_features.json`, `features.json`, `joined.json`,
 `research_rows.json`, `status.json`, and `report.json`. The model method saves
 the unchanged baseline's artifacts under `model/`. Minute cross-provider
-features are not silently injected into the HK daily model; that needs a
-separately defined training dataset and availability policy.
+features are not silently injected into the HK daily model. The new
+`compare-models` command uses separately defined causal daily Qlib expressions,
+local MLflow tracking, and costed artificial trading. See the full
+[model comparison, fee schedule, results, and test cases](ml-comparison.md).
 
 ## Coding standard and test cases
 
@@ -153,7 +165,7 @@ new test files from GitHub updates. Their cases are documented here:
 | Alignment | No future observation; inclusive age boundary; stale/missing nulls; duplicate bars/outcomes rejected |
 | Features | Independent symbols; rolling warm-up; gap resets; future data cannot alter past features |
 | Selection | Preferred backend; unavailable-runtime fallback; explicit request rejection; no execution capability |
-| Isolation | Lazy imports; separate runtime paths; output cannot be nested in source capture |
+| Isolation | Lazy imports; shared default Python; explicit runtime paths; output cannot be nested in source capture |
 | Failure | Backend crash records failure and never silently switches; tampered raw response rejected |
 | Artifacts | Atomic report publication; invalid JSON report type rejected |
 | Real integration | Both native replays, Qlib storage/expressions, joint row alignment, portable ML, fresh HK.00700 live ticks and reconnects |
@@ -161,7 +173,7 @@ new test files from GitHub updates. Their cases are documented here:
 No provider code or original Qlib exporter is modified. Historical coverage is
 currently raw US one-minute equities and Polymarket outcome history. Live
 coverage is HK.00700 trades/BBO. Options, news, full-depth native mapping,
-execution, and a certified point-in-time history remain outside this version.
+live execution, and a certified point-in-time history remain outside this version.
 
 ## Verification on November 9, 2026
 

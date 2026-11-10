@@ -1,7 +1,7 @@
 """Dependency-free structural coding gate for all joint framework modules.
 
 This checks syntax, documentation, annotations, explicit exception handling,
-line length and the read-only boundary. It is not a substitute for semantic
+line length and restricted order-routing entrypoints. It is not a substitute for semantic
 type checking or behavioral tests, which are described in the coding guide.
 """
 
@@ -15,9 +15,19 @@ def check(root: Path) -> list[str]:
     """Return all standards violations without importing or executing modules."""
     failures: list[str] = []
     forbidden = {"submit_order", "MarketOrder", "LimitOrder", "SetHoldings", "Liquidate"}
-    for path in sorted(root.glob("*.py")):
+    for path in sorted(root.rglob("*.py")):
         source = path.read_text(encoding="utf-8")
         tree = ast.parse(source, filename=str(path))
+        # Explicit offline adapters need the native Strategy entrypoint.
+        # Do not exempt other order calls or future modules from this gate.
+        offline_nautilus = path.name in ("paper_nautilus.py", "lifecycle_nautilus.py",
+                                        "nautilus_features_orders.py", "nautilus_features_contingent.py",
+                                        "nautilus_order_matrix.py", "nautilus_trigger_variants.py")
+        if offline_nautilus:
+            imports = [n.module or "" for n in ast.walk(tree) if isinstance(n, ast.ImportFrom)]
+            if ("nautilus_trader.backtest.engine" not in imports
+                    or any("live" in m or "adapters" in m for m in imports)):
+                failures.append(f"{path.name}: native execution must remain BacktestEngine-only")
         if not ast.get_docstring(tree):
             failures.append(f"{path.name}: missing module documentation")
         for line, text in enumerate(source.splitlines(), 1):
@@ -42,8 +52,8 @@ def check(root: Path) -> list[str]:
                 failures.append(f"{where}: production validation must survive python -O")
             if isinstance(node, ast.Call):
                 name = getattr(node.func, "attr", getattr(node.func, "id", ""))
-                if name in forbidden:
-                    failures.append(f"{where}: execution is outside the data-only contract")
+                if name in forbidden and not (offline_nautilus and name == "submit_order"):
+                    failures.append(f"{where}: order-routing entrypoints are forbidden in joint modules")
                 if any(k.arg == "shell" and isinstance(k.value, ast.Constant) and k.value.value
                        for k in node.keywords):
                     failures.append(f"{where}: shell execution is forbidden")
@@ -57,7 +67,7 @@ def main() -> None:
     failures = check(root)
     if failures:
         raise SystemExit("\n".join(failures))
-    print(f"Structural coding gate passed for {len(list(root.glob('*.py')))} modules")
+    print(f"Structural coding gate passed for {len(list(root.rglob('*.py')))} modules")
 
 
 if __name__ == "__main__":

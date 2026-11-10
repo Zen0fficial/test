@@ -1,0 +1,50 @@
+Qlib adaptation notice
+
+CompatibleTSTCN.predict in qlib_model_extensions_compat.py adapts
+Microsoft Qlib v0.9.7 qlib/contrib/model/pytorch_tcn_ts.py.
+Source: https://github.com/microsoft/qlib/blob/v0.9.7/qlib/contrib/model/pytorch_tcn_ts.py
+Change: transpose the inference input's time/feature axes to match the native
+train_epoch/test_epoch path. Native network, optimizer and losses are unchanged.
+
+CompatibleInternalData._calc_perf in qlib_meta_parquet.py adapts the native
+InternalData performance calculation in qlib/contrib/meta/data_selection/dataset.py.
+Source: https://github.com/microsoft/qlib/blob/v0.9.7/qlib/contrib/meta/data_selection/dataset.py
+Change: preserve datetime group labels explicitly under pandas 2; native Spearman
+correlation, proxy training, masking and meta-learning remain unchanged.
+
+HKStateAdapter.update in paper_qlib.py adapts the execution-state update in
+Microsoft Qlib v0.9.7, qlib/rl/order_execution/strategy.py.
+Source: https://github.com/microsoft/qlib/blob/v0.9.7/qlib/rl/order_execution/strategy.py
+Changes: observed HK calendar indices/timestamps, accumulation of same-minute
+fills, and explicit invalid-index/overfill/quote validation. Upstream metric
+formulas and the native executors, exchange and accounting remain in use.
+
+Copyright (c) Microsoft Corporation.
+
+workflows/manager.py and workflows/trainer.py adapt the TaskManager and
+TrainerRM/DelayTrainerRM contracts from Qlib v0.9.7:
+https://github.com/microsoft/qlib/blob/v0.9.7/qlib/workflow/task/manage.py
+https://github.com/microsoft/qlib/blob/v0.9.7/qlib/model/trainer.py
+Persistence uses local SQLite claims and immutable Parquet history instead of
+MongoDB. Native Qlib task training callbacks and MLflow recorders remain in use.
+Lease fencing, bounded retries and crash recovery are documented extensions.
+
+MIT License
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.

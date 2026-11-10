@@ -6,6 +6,7 @@ __pycache__/
 build/
 dist/
 output/
+mlruns/
 coverage_audit/
 tmp/
 .env
@@ -14,8 +15,32 @@ tmp/
 *.log
 
 # Platform and ML tests are kept locally, outside published updates.
+/futu_bridge/tests/test_*.py
 /futu_bridge/tests/test_live_converters.py
 /futu_bridge/tests/test_ml_baseline.py
 /futu_bridge/tests/test_platform_converters.py
 /scripts/test_platforms.ps1
 /futu_bridge/tests/test_joint.py
+/futu_bridge/tests/test_costed_simulation.py
+/futu_bridge/tests/test_rl.py
+/futu_bridge/tests/test_qlib_native_rl.py
+/futu_bridge/tests/test_native_paper.py
+/futu_bridge/tests/test_order_lifecycle.py
+/futu_bridge/tests/test_extended_lifecycle.py
+/futu_bridge/tests/test_feature_extensions.py
+/futu_bridge/tests/test_qlib_features.py
+/futu_bridge/tests/test_nautilus_features.py
+/futu_bridge/tests/test_lean_features.py
+/futu_bridge/tests/test_nautilus_contingent.py
+/futu_bridge/tests/test_qlib_tasks.py
+/futu_bridge/tests/test_evidence.py
+/futu_bridge/tests/test_parquet_storage.py
+/futu_bridge/tests/test_parquet_tasks.py
+/futu_bridge/tests/test_parquet_review.py
+/futu_bridge/tests/test_qlib_parquet.py
+/futu_bridge/tests/test_online_parquet.py
+/futu_bridge/tests/test_qlib_model_extensions.py
+/futu_bridge/tests/test_parquet_*.py
+/futu_bridge/tests/test_qlib_parquet*.py
+/futu_bridge/tests/test_nautilus_recovery*.py
+/futu_bridge/tests/test_nautilus_order_extensions*.py

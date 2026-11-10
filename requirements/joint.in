@@ -1,0 +1,17 @@
+# Common Windows CPython 3.12 research environment. Resolve together, never independently.
+pyqlib[rl]==0.9.7
+# Build with scripts/build_tianshou_compat.py and resolve using --find-links tmp/joint-wheels.
+tianshou==0.4.10+joint.1
+nautilus_trader==1.231.0
+mlflow==3.18.0
+numpy==1.26.4
+pandas==2.3.3
+# Arrow 26 needs NumPy 2 at runtime despite absent metadata; 25 supports both engines.
+pyarrow==25.0.1
+scikit-learn==1.9.1
+lightgbm==4.7.0
+cvxpy==1.7.5
+websocket-client==1.9.2
+gymnasium==1.4.0
+stable-baselines3==2.9.2
+torch==2.15.0

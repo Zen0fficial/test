@@ -12,14 +12,27 @@ from .contracts import Dataset
 from .features import FEATURE_NAMES, reference_features
 
 
-def run(capture: Path, storage: Path, output: Path) -> None:
+def run(capture: Path, storage: Path, output: Path, backend: str = "qlib") -> None:
     """Evaluate Qlib expressions; reject missing rows or excessive float32 error."""
+    dataset = Dataset.from_capture(capture)
+    expected = reference_features(dataset.bars)
+    if backend in ("numpy", "reference"):
+        from .performance import compare, numpy_features
+
+        started = time.perf_counter()
+        rows = numpy_features(dataset.bars) if backend == "numpy" else reference_features(dataset.bars)
+        elapsed = time.perf_counter() - started
+        error = compare(expected, rows, 1e-12)
+        output.write_text(json.dumps({"rows": rows, "max_absolute_error": error, "backend": backend,
+                          "absolute_tolerance": 1e-12, "expression_seconds": elapsed}, allow_nan=False),
+                          encoding="utf-8")
+        return
+    if backend != "qlib":
+        raise ValueError("Unknown feature implementation")
     import qlib
     from qlib.config import REG_US
     from qlib.data import D
 
-    dataset = Dataset.from_capture(capture)
-    expected = reference_features(dataset.bars)
     qlib.init(provider_uri=str(storage.resolve()), region=REG_US,
               expression_cache=None, dataset_cache=None)
     started = time.perf_counter()
@@ -62,8 +75,9 @@ def main() -> None:
     parser.add_argument("--capture", type=Path, required=True)
     parser.add_argument("--storage", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--backend", choices=("qlib", "numpy", "reference"), default="qlib")
     args = parser.parse_args()
-    run(args.capture, args.storage, args.output)
+    run(args.capture, args.storage, args.output, args.backend)
 
 
 if __name__ == "__main__":

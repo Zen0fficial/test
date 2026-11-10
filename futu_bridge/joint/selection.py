@@ -7,7 +7,7 @@ from enum import Enum
 
 
 class Capability(str, Enum):
-    """Supported data-only operations; execution is deliberately absent."""
+    """Data-backend preferences; ML/RL and offline simulation have explicit APIs."""
 
     REPLAY = "replay"
     LIVE = "live"
@@ -35,7 +35,7 @@ def select(capability: Capability, available: set[str], requested: str = "auto")
         Capability.REPLAY: ("nautilus", "lean"),
         Capability.LIVE: ("lean", "nautilus"),
         Capability.FEATURES: ("qlib", "reference"),
-        Capability.STORAGE: ("qlib",),
+        Capability.STORAGE: ("parquet", "qlib"),
     }
     preferences = policies[capability]
     candidates = preferences if requested == "auto" else (requested,)

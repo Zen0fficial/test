@@ -1,4 +1,4 @@
-"""One data-only API coordinating specialized engines in isolated processes."""
+"""One research API coordinating engines in workers with shared Python dependencies."""
 
 from __future__ import annotations
 
@@ -12,12 +12,12 @@ from pathlib import Path
 from .alignment import align
 from .contracts import Dataset
 from .features import reference_features
-from .selection import Capability, select
+from .selection import Capability, Selection, select
 
 
 @dataclass(frozen=True, slots=True)
 class RuntimePaths:
-    """Explicit executables/source roots; never install into another runtime."""
+    """Shared Python by default; explicit paths retain legacy/runtime portability."""
 
     repo: Path
     qlib_python: Path
@@ -28,10 +28,10 @@ class RuntimePaths:
 
     @classmethod
     def local(cls, repo: Path) -> RuntimePaths:
-        """Use this repository's prepared, isolated Windows runtimes."""
+        """Use one pinned Python for Qlib, Nautilus, and MLflow; LEAN retains .NET."""
         root = repo.resolve()
-        return cls(root, root / ".venv-qlib/Scripts/python.exe",
-                   root / ".venv-nautilus/Scripts/python.exe", root / "tmp/dotnet/dotnet.exe",
+        return cls(root, root / ".venv-joint/Scripts/python.exe",
+                   root / ".venv-joint/Scripts/python.exe", root / "tmp/dotnet/dotnet.exe",
                    root / "tmp/qlib-v0.9.7", root / "tmp/lean-src")
 
     def available(self) -> set[str]:
@@ -41,6 +41,7 @@ class RuntimePaths:
             result.add("qlib")
         if self.nautilus_python.is_file():
             result.add("nautilus")
+            result.add("parquet")
         if self.dotnet.is_file() and self.qlib_python.is_file() and (
             self.lean_source / "Launcher/QuantConnect.Lean.Launcher.csproj"
         ).is_file():
@@ -74,6 +75,13 @@ class JointResearch:
     def __init__(self, runtimes: RuntimePaths) -> None:
         """Bind paths without importing frameworks or starting providers."""
         self.runtimes = runtimes
+
+    def research_parquet(self, output: Path, *, response: Path, daily_response: Path,
+                         baseline: Path) -> dict[str, object]:
+        """Run a canonical snapshot bundle through models and three native simulated engines."""
+        from .parquet_workflow import run
+
+        return run(response, daily_response, baseline, output, self.runtimes.repo)
 
     def _execute(self, command: list[str], root: Path, name: str, timeout: int | None = 300) -> float:
         """Run without a shell, with bounded waits and an operation-specific log."""
@@ -112,6 +120,7 @@ class JointResearch:
     def history(
         self, capture: Path, output: Path, *, allow_retrospective: bool = False,
         verify_all: bool = True, max_age_seconds: int = 120, replay_backend: str = "auto",
+        performance_profile: Path | None = None,
     ) -> dict[str, object]:
         """Create joint features and cross-provider observations from one capture.
 
@@ -148,6 +157,11 @@ class JointResearch:
                     raise ValueError("Capture record escapes the source directory")
                 shutil.copyfile(source, snapshot / source.name)
             dataset = Dataset.from_capture(snapshot)
+            if performance_profile is not None:
+                from .performance import choose
+
+                measured = choose(performance_profile, dataset)
+                feature_backend = Selection(measured, "Verified equivalent-workload benchmark selection", False)
             started = time.perf_counter()
             reference = reference_features(dataset.bars)
             reference_seconds = time.perf_counter() - started
@@ -172,7 +186,7 @@ class JointResearch:
                         or report.get("probabilities") != len(dataset.probabilities)):
                     raise ValueError(f"Incomplete/mismatched {backend} report")
                 reports[backend] = report
-            if feature_backend.backend == "qlib":
+            if feature_backend.backend == "qlib" or (verify_all and "qlib" in available):
                 durations["qlib_storage"] = self._execute([
                     str(self.runtimes.qlib_python), "-m", "futu_bridge.converters.qlib", "--capture", str(snapshot),
                     "--output", str(root / "qlib"), "--qlib-source", str(self.runtimes.qlib_source)], root, "qlib")
@@ -185,7 +199,13 @@ class JointResearch:
                 reports["qlib"] = qlib_report
                 self._execute([str(self.runtimes.qlib_python), "-m", "futu_bridge.joint.feature_worker",
                                "--capture", str(snapshot), "--storage", str(root / "qlib/equity_bin"),
-                               "--output", str(root / "features.json")], root, "qlib-features")
+                               "--output", str(root / "features.json"), "--backend", feature_backend.backend],
+                              root, "selected-features")
+            elif feature_backend.backend == "numpy":
+                self._execute([str(self.runtimes.qlib_python), "-m", "futu_bridge.joint.feature_worker",
+                               "--capture", str(snapshot), "--storage", str(root / "unused"),
+                               "--output", str(root / "features.json"), "--backend", "numpy"],
+                              root, "selected-features")
             else:
                 write_report(root / "features.json", {"rows": reference, "max_absolute_error": 0.0})
             feature_report = read_report(root / "features.json")
@@ -292,3 +312,116 @@ class JointResearch:
         if report.get("completed") is not True or report.get("orders_enabled") is not False:
             raise ValueError("Incomplete data-only model report")
         return report
+
+    def compare_models(self, output: Path, *, response: Path, baseline_dir: Path,
+                       storage: str = "parquet") -> dict[str, object]:
+        """Compare research models with local artificial trades; never enable real orders."""
+        root = output.resolve()
+        root.mkdir(parents=True, exist_ok=False)
+        self._execute([str(self.runtimes.qlib_python), "-m", "futu_bridge.joint.comparison",
+                       "--response", str(response.resolve()), "--baseline-dir", str(baseline_dir.resolve()),
+                       "--output", str(root / "comparison"), "--qlib-source", str(self.runtimes.qlib_source),
+                       "--storage", storage],
+                      root, "comparison", timeout=600)
+        report = read_report(root / "comparison/report.json")
+        if report.get("completed") is not True or report.get("real_orders_enabled") is not False:
+            raise ValueError("Comparison did not complete with real orders disabled")
+        return report
+
+    def train_rl(self, output: Path, *, response: Path, baseline_dir: Path,
+                 steps: int = 32768) -> dict[str, object]:
+        """Train shared-runtime PPO policies and evaluate only artificial portfolios."""
+        root = output.resolve()
+        root.mkdir(parents=True, exist_ok=False)
+        self._execute([str(self.runtimes.qlib_python), "-m", "futu_bridge.joint.rl",
+                       "--response", str(response.resolve()), "--baseline-dir", str(baseline_dir.resolve()),
+                       "--output", str(root / "rl"), "--qlib-source", str(self.runtimes.qlib_source),
+                       "--steps", str(steps)], root, "rl", timeout=3600)
+        report = read_report(root / "rl/report.json")
+        if report.get("completed") is not True or report.get("real_orders_enabled") is not False:
+            raise ValueError("RL did not complete with real orders disabled")
+        self._execute([str(self.runtimes.nautilus_python), "-m", "futu_bridge.joint.rl_verify",
+                       "--run", str(root / "rl")], root, "rl-verify", timeout=300)
+        verification = read_report(root / "rl/verification.json")
+        if verification.get("passed") is not True or verification.get("real_orders_enabled") is not False:
+            raise ValueError("Independent RL verification failed")
+        report = {**report, "independent_verification": verification}
+        write_report(root / "report.json", report)
+        return report
+
+    def train_qlib_rl(self, output: Path, *, response: Path,
+                      iterations: int = 24, episodes: int = 32, storage: str = "parquet") -> dict[str, object]:
+        """Train native Qlib PPO/DQN and independently audit simulated execution."""
+        root = output.resolve()
+        root.mkdir(parents=True, exist_ok=False)
+        self._execute([str(self.runtimes.qlib_python), "-m", "futu_bridge.joint.parquet_training",
+                       "--algorithm", "simple", "--storage", storage,
+                       "--response", str(response.resolve()), "--output", str(root / "qlib_rl"),
+                       "--iterations", str(iterations), "--episodes", str(episodes)],
+                      root, "qlib-rl", timeout=3600)
+        report = read_report(root / "qlib_rl/report.json")
+        if report.get("completed") is not True or report.get("real_orders_enabled") is not False:
+            raise ValueError("Native Qlib RL did not complete with real orders disabled")
+        self._execute([str(self.runtimes.qlib_python), "-m", "futu_bridge.joint.qlib_rl_verify",
+                       "--run", str(root / "qlib_rl")], root, "qlib-rl-verify", timeout=180)
+        verification = read_report(root / "qlib_rl/verification.json")
+        if verification.get("passed") is not True or verification.get("real_orders_enabled") is not False:
+            raise ValueError("Native Qlib RL independent verification failed")
+        report = {**report, "independent_verification": verification}
+        write_report(root / "report.json", report)
+        return report
+
+    def train_qlib_nested(self, output: Path, *, response: Path,
+                          iterations: int = 8, episodes: int = 16, storage: str = "parquet") -> dict[str, object]:
+        """Train through Qlib's full nested HK exchange with native simulated accounts."""
+        root = output.resolve()
+        root.mkdir(parents=True, exist_ok=False)
+        self._execute([str(self.runtimes.qlib_python), "-m", "futu_bridge.joint.parquet_training",
+                       "--algorithm", "nested", "--storage", storage,
+                       "--response", str(response.resolve()), "--output", str(root / "nested"),
+                       "--iterations", str(iterations), "--episodes", str(episodes)], root, "nested", timeout=3600)
+        report = read_report(root / "nested/report.json")
+        if (report.get("passed") is not True or report.get("real_orders_enabled") is not False
+                or report.get("independent_verification", {}).get("passed") is not True):
+            raise ValueError("Native nested training or execution verification failed")
+        write_report(root / "report.json", report)
+        return report
+
+    def simulate_native(self, output: Path, *, response: Path) -> dict[str, object]:
+        """Compare Qlib, Nautilus and LEAN native simulated fills and accounting."""
+        from .paper import run
+
+        if self.runtimes.qlib_python.resolve() != self.runtimes.nautilus_python.resolve():
+            raise ValueError("Native execution comparison requires one shared Python environment")
+        return run(response, output, self.runtimes.repo, self.runtimes.qlib_python,
+                   self.runtimes.lean_source, self.runtimes.dotnet)
+
+    def simulate_lifecycle(self, output: Path, *, response: Path, suite: str = "all") -> dict[str, object]:
+        """Test simulated order lifecycles, including stop-limits, amendments and expiry."""
+        from .lifecycle_runner import run
+
+        if self.runtimes.qlib_python.resolve() != self.runtimes.nautilus_python.resolve():
+            raise ValueError("Lifecycle conformance requires one shared Python environment")
+        return run(response, output, self.runtimes.repo, self.runtimes.qlib_python,
+                   self.runtimes.lean_source, self.runtimes.dotnet, suite)
+
+    def verify_features(self, output: Path, *, response: Path, daily_response: Path,
+                        platforms: tuple[str, ...] = ("qlib", "nautilus", "lean", "mlflow"),
+                        mongo_uri: str | None = None) -> dict[str, object]:
+        """Run native feature/model/portfolio/registry acceptance against fixed real captures."""
+        from .coverage_runner import run
+
+        if self.runtimes.qlib_python.resolve() != self.runtimes.nautilus_python.resolve():
+            raise ValueError("Feature verification requires one shared Python environment")
+        return run(response, daily_response, output, self.runtimes.repo, self.runtimes.qlib_python, platforms,
+                   mongo_uri=mongo_uri)
+
+    def benchmark_features(self, capture: Path, storage: Path, output: Path) -> dict[str, object]:
+        """Select equivalent feature implementations using repeated correctness-qualified timings."""
+        output = output.resolve()
+        log_root = output.parent
+        log_root.mkdir(parents=True, exist_ok=True)
+        self._execute([str(self.runtimes.qlib_python), "-m", "futu_bridge.joint.performance",
+                       "--capture", str(capture.resolve()), "--storage", str(storage.resolve()),
+                       "--output", str(output)], log_root, output.name + "-benchmark", timeout=300)
+        return read_report(output / "report.json")

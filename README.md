@@ -12,16 +12,17 @@ data access. Both sources share one local service. See [Polymarket usage](docs/p
 
 Optional [platform-specific converters](docs/platform-converters.md) let
 **Qlib, NautilusTrader and locally built LEAN** consume the same fixed provider
-responses in separate runtimes. The existing providers and Qlib exporter remain
+responses through framework-specific adapters. The existing providers and Qlib exporter remain
 unchanged. Actual local-data replay checks cover US equity minute bars and
 Polymarket probability history, including timestamps and precision. Trading
-remains manual; platform tests only observe data and submit no simulated or
-live orders.
+remains manual; live adapters and replay observers place no orders. The optional
+local portfolio simulator records artificial fills only.
 
 [Continuous HK.00700 feeds](docs/live-platform-feeds.md) connect the same local
 native push stream to NautilusTrader's live data client and LEAN's live data
 queue. Both receive native trade and best bid/ask ticks, retry disconnected
-streams, and retain source-to-callback evidence. Run both on the prepared machine:
+streams, and retain source-to-callback evidence. Prepare the
+[shared Python environment](docs/shared-runtime.md), then run both:
 
 ```powershell
 & .\scripts\run_live_platforms.ps1
@@ -35,8 +36,70 @@ a useful improvement over its constant probability baseline.
 
 The [joint research framework](docs/joint-framework.md) provides one API for
 native replay, continuous data feeds, Qlib features, causal Futu/Polymarket
-alignment, and the manual-review ML baseline. It preserves the fixed providers
-and isolated runtimes, with explicit backend selection and auditable results.
+alignment, and [costed HK.00700 model comparisons](docs/ml-comparison.md). It preserves
+the fixed providers, with explicit backend selection and auditable results.
+Qlib, NautilusTrader, and MLflow now use [one pinned Python environment](docs/shared-runtime.md)
+with shared NumPy, pandas, and PyArrow versions. MLflow records Qlib experiments
+in local SQLite. LEAN retains its .NET runtime.
+
+[Native Qlib reinforcement learning](docs/native-qlib-rl.md) now trains Qlib's
+PPO and DQN policies through its own trainer, recurrent network, interpreters,
+and simple order-execution simulator. The separate [full native execution path](docs/native-execution.md)
+now supports Qlib's nested day/30-minute/1-minute HK simulator and native
+simulated execution in NautilusTrader and LEAN. Both Qlib simulators support
+native PPO/DQN training. These workflows use real captured HK.00700 minute
+data, costed artificial trades, and independent ledger verification. The
+existing SB3 allocation experiment remains a separate backend. Neither sends
+brokerage orders.
+
+[Order lifecycle simulation](docs/order-lifecycle.md) supports limit/stop-market
+orders, cancellations and partial fills. The [advanced lifecycle extension](docs/advanced-order-lifecycle.md)
+adds stop-limits, price/quantity/trigger amendments, and GTC, HK DAY and exact-time
+GTD policies. Native Nautilus/LEAN order state and a Qlib lifecycle converter
+are checked against real HK.00700 minute data, including parent fees and account
+balances. Liquidity is a declared simulation assumption; all trades are offline.
+
+Full upstream feature coverage is still in progress. Inspect the explicit
+feature-family inventory and available local verification evidence with:
+
+```powershell
+.\.venv-joint\Scripts\python.exe -m futu_bridge.joint capabilities
+```
+
+See the [original coverage audit](docs/framework-capability-audit.md) and the
+[native RL milestone](docs/native-qlib-rl.md) and
+[native execution milestone](docs/native-execution.md) for the remaining gaps.
+
+The [Parquet operator guide](docs/parquet-operations.md) covers immutable storage,
+incremental observations, durable live journals, compaction, backup and rollback.
+[Native Qlib adapters](docs/qlib-parquet.md) read Parquet directly and preserve
+feature/model/RL behavior; [local task workers](docs/qlib-parquet-tasks.md) replace
+MongoDB coordination with fenced SQLite claims and Parquet history. `compare-models`
+defaults to Parquet; `--storage legacy_bin` retains the legacy reproduction path.
+Native joint RL commands default to Parquet too, with `--storage legacy_json`
+preserving their original input path and unchanged learning budgets.
+`research-parquet` runs a pinned daily/minute bundle through model comparison and
+the three native simulated execution engines. The fixed providers and shared
+environment remain unchanged.
+
+The expanded adapters include [29 native Qlib learner classes and MetaModelDS](docs/qlib-native-models.md),
+[durable online scheduling](docs/qlib-online-parquet.md), [37 native Nautilus indicators](docs/native-indicators.md),
+[activation-price orders](docs/native-activation-orders.md), and
+[LEAN process recovery](docs/lean-recovery.md). The [provider field inventory](docs/provider-field-coverage.md)
+documents ten additional typed data families and every pinned public route,
+including fields retained only as original JSON.
+
+See the [Parquet release status](docs/parquet-release.md) for implementation
+choices, real-data verification, native execution differences and the remaining
+engineering/data/dependency gaps. [Panel signal analysis](docs/panel-signal-analysis.md)
+checks saved learner outputs without refitting or executing trades.
+
+The [LEAN feature workflow](docs/lean-feature-coverage.md) includes native
+optimization and shared-Python QuantBook verification. See
+[native order coverage](docs/native-order-coverage.md) for partial brackets,
+process recovery and extended order cases, and the
+[development plan](docs/parquet-development-plan.md) for remaining acceptance gates.
+These scoped implementations do not imply every upstream feature is integrated.
 
 The Futu desktop application itself is not part of this repository. Run the
 bridge against a locally installed, signed-in Futu desktop session. Version
