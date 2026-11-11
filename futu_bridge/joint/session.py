@@ -406,15 +406,13 @@ class JointResearch:
                    self.runtimes.lean_source, self.runtimes.dotnet, suite)
 
     def verify_features(self, output: Path, *, response: Path, daily_response: Path,
-                        platforms: tuple[str, ...] = ("qlib", "nautilus", "lean", "mlflow"),
-                        mongo_uri: str | None = None) -> dict[str, object]:
+                        platforms: tuple[str, ...] = ("qlib", "nautilus", "lean", "mlflow")) -> dict[str, object]:
         """Run native feature/model/portfolio/registry acceptance against fixed real captures."""
         from .coverage_runner import run
 
         if self.runtimes.qlib_python.resolve() != self.runtimes.nautilus_python.resolve():
             raise ValueError("Feature verification requires one shared Python environment")
-        return run(response, daily_response, output, self.runtimes.repo, self.runtimes.qlib_python, platforms,
-                   mongo_uri=mongo_uri)
+        return run(response, daily_response, output, self.runtimes.repo, self.runtimes.qlib_python, platforms)
 
     def benchmark_features(self, capture: Path, storage: Path, output: Path) -> dict[str, object]:
         """Select equivalent feature implementations using repeated correctness-qualified timings."""

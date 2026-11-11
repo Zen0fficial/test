@@ -6,6 +6,14 @@ task coordinator with a local SQLite control database and immutable Parquet task
 history. All workers use `.venv-joint`; providers and installed packages remain
 unchanged. No MongoDB server, Redis server or trading connection is constructed.
 
+The former `qlib_features_tasks` entrypoint now delegates to this implementation.
+The joint feature CLI no longer accepts `--mongo-uri`; legacy Python calls that
+provide a MongoDB URI fail before opening a client or creating output. Qlib's
+installed `pymongo` dependency remains in the fixed shared environment for import
+compatibility only.
+The former `scripts/joint_mongodb.ps1` installer is a retired compatibility stub;
+all actions fail with migration guidance before any download or process change.
+
 ## Ownership and guarantees
 
 `futu_bridge.joint.workflows` exports `TaskManager`, `TrainerRM`,
@@ -234,7 +242,7 @@ $env:MKL_NUM_THREADS = '1'
 $env:NUMEXPR_NUM_THREADS = '1'
 .venv-joint/Scripts/python.exe -m futu_bridge.joint.workflows.acceptance `
   --response output/joint/model_20261109/model/provider_response.json `
-  --output output/joint/parquet_tasks_20261110
+  --output output/joint/task_check_new
 ```
 
 The acceptance runner imports 1,683 real HK.00700 daily observations into the
@@ -281,11 +289,10 @@ future; the transient retry occurred 172 milliseconds after its first attempt,
 exceeding the configured 100-millisecond backoff. Windows monotonic-clock resolution
 limits precision for the shortest recovery measurement. The earlier successful
 `parquet_tasks_verified_20261110` report certifies the initial wall-clock implementation
-only and remains preserved. The earlier
-`parquet_tasks_20261110` attempt is retained as failed evidence: its worker-PID
-oracle incorrectly compared a Windows virtual-environment redirector PID with
-the actual Python worker PID. The corrected run verifies actual child identities
-and terminates the owned child process tree during fault injection.
+only and remains preserved. The current run verifies actual child identities
+and terminates the owned child process tree during fault injection. Failed and
+incomplete attempts have been removed from the active results tree at the user's
+request; they do not count as verification evidence.
 
 Five further backup tests verify the accepted real-training store (22 tasks,
 21 native recorders), exact task/result/history restoration, running-claim and

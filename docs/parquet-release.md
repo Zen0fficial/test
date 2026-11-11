@@ -105,8 +105,9 @@ All six simple RL policies retain 24 iterations with 32 episodes each, and both
 nested policies retain eight iterations with 16 episodes each. The final change
 to the simple-RL verifier only rejects missing snapshot identities before access;
 the saved training results were preserved and all eleven resulting ledgers were
-independently re-audited with the current verifier. Earlier failed probes and
-historical source manifests remain available rather than being overwritten.
+independently re-audited with the current verifier. Historical source manifests
+remain immutable. Failed and incomplete run folders were subsequently removed
+from the active results tree at the user's request; they do not count as evidence.
 
 A 60-second live capture durably recorded 473 received messages, including 464
 fresh observations, across one forced reconnect with no local overflow. It does
@@ -121,6 +122,28 @@ excluded from the wheel; local MLflow artifact directories are ignored by Git.
 The machine-readable release report links the logs, source-bound component audit,
 capability inventory and wheel checksum. Test-case descriptions are in the linked
 component documents; executable tests and raw captures remain local.
+
+## November 11 repeat verification and MongoDB retirement
+
+The repeat evidence is in `output/joint/full_retest_20261111/report.json`.
+All offline checks passed: 484 Python regressions, three JavaScript tests,
+the four-framework feature suite, 390 lifecycle scenarios, 61 interrupted-process
+recovery cases, the model/indicator suites, Parquet restoration and packaging.
+The six simple and two nested Qlib policies retained their original budgets;
+allocation PPO also completed nine policies at 32,768 steps each. These counts
+overlap and do not establish full upstream feature coverage or trading profitability.
+
+The unused MongoDB execution option was retired during this repeat. The old
+`qlib_features_tasks` entrypoint now runs the local replacement; `--mongo-uri`
+is rejected. The affected feature and task entrypoints were retested after the
+change. Parquet remains the analytical/history store, with SQLite coordinating
+transactions and MLflow metadata. Qlib's `pymongo` import dependency remains in
+the unchanged shared lock, without a MongoDB service.
+
+The live checks ran after the Hong Kong close. Both converters connected but
+admitted no fresh updates; their verifiers failed on absent admitted-data files.
+The report therefore records offline success and **live freshness unverified**,
+not an overall live-feed pass. An open-session repeat is still required.
 
 ## Remaining release gates
 

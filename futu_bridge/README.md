@@ -8,13 +8,13 @@ The November 4, 2026 check of 16.37.27308 returned AAPL/Tencent quotes and daily
 
 ## Python usage
 
-From this checkout, D:\python\python.exe can use the native dependency already in coverage_audit/vendor. For another environment:
+Install the native extra in the provider environment:
 
 ```powershell
 python -m pip install -e '.[native]'
 ```
 
-The core library and HTTP server use the standard library. The desktop adapter additionally requires Frida; the native extra includes tzdata on Windows for market-local calendar defaults. A wheel is available under dist/; it includes agent scripts and the instrument universe, and excludes local databases, evidence, and vendored dependencies.
+The core library and HTTP server use the standard library. The desktop adapter additionally requires Frida; the native extra includes tzdata on Windows for market-local calendar defaults. Built wheels include agent scripts and the instrument universe, and exclude local databases, evidence, and vendored dependencies.
 
 ```python
 from futu_bridge import FutuClient, ProviderError
@@ -47,7 +47,7 @@ All data calls return MarketDataResponse with data, source, warnings, request_id
 
 FutuClient.desktop(pid=..., catalog_path=..., stream_mode="push", push_queue_size=1024) supports optional local configuration. Use stream_mode="poll", poll_interval=1 for the older polling adapter. FutuClient() starts unconnected; importing the library does not attach. Context managers close streams and the provider. Run the repository example with `python -m examples.read_market_data`.
 
-A specific current expiry can be selected with client.option_chain("US.AAPL", expiry="2026-10-30"). Results include available_expiries, native IDs, symbols, side, strike, expiry, and original metadata. Contracts are registered within that client/provider session. Discover the chain first in a new session: option symbols may be absent from the ordinary stock catalog. Expired-contract discovery is not implemented. US option labels are verified; Hong Kong routing remains experimental.
+A specific expiry returned by discovery can be passed to client.option_chain("US.AAPL", expiry=expiry). Results include available_expiries, native IDs, symbols, side, strike, expiry, and original metadata. Contracts are registered within that client/provider session. Discover the chain first in a new session: option symbols may be absent from the ordinary stock catalog. Expired-contract discovery is not implemented. US option labels are verified; Hong Kong routing remains experimental.
 
 ## Discover instruments
 
@@ -76,10 +76,6 @@ market_universe.json contains **126 catalog-verified instruments**: 55 continuou
 | Forex | FX.EURUSD, FX.USDJPY, FX.USDCNH |
 
 ZNmain is a continuous 10-year Treasury **futures** series. Cash bonds, continuous series, and dated contracts are distinct instruments. Continuous-futures roll rules, historical constituent mappings, and back-adjustment methodology are not established. Futures prices retain quote units; the library does not compute contract P&L or infer multipliers from price alone.
-
-Actual coverage is recorded in coverage_audit/full_test/report.json and http_results.json, with a readable per-instrument table in RESULTS.md. Retrieval success does not certify complete history or real-time latency.
-
-The October 25, 2026 audit covers **135 instruments and 542 HTTP feed/chain/stream checks**. Final outcomes: 494 data checks passed; 26 feeds were unavailable; 18 were blocked by native permissions; two history windows were empty; one cash-index trade request was explicitly unsupported; the stream delivered three initial snapshots without a subsequent market update. All 16 actual Python history checks and all 100 offline/local-HTTP regression tests passed. There were no invalid-data results or decoder HTTP 502 failures in the broad run. Four targeted checks were repeated after correcting index semantics and the audit reader's size bound; original observations are preserved.
 
 ## Qlib preparation
 
@@ -287,26 +283,18 @@ The installed descriptor confirms `KLINE_PROB_NONE=0`, `KLINE_PROB_US_WITH_BA=1`
 
 Selection uses the provider's native `trade_section` values, without a clock-hour filter. The observed stock mapping is 12=regular, 5=premarket, 6=postmarket, 11=overnight; the option mapping is 21 or 22=regular, 23=premarket, 24=postmarket. Different US option regimes use different regular-section IDs: the tested SPCX call/put use 21 for their regular-only default response, while the tested AAPL/MSFT extended-session options use 22. The older bundled enum descriptor does not name all these newer IDs, so semantic labels remain explicitly marked `session_mapping_basis="observed_provider_sections"`, `section_enum_labels_verified=False`, and `session_hours_verified=False`. `session_filter_verified=True` describes the tested filtering operation. Unknown section IDs cause an explicit error. Returned candles retain raw IDs, native timestamps, `point_type`, and zero-volume/replenished bars; an option premarket chart candle does not establish that a trade occurred then.
 
-October 23 one-minute downloads returned MSFT stock candles in these counts: 390 regular, 330 premarket, 240 postmarket, 480 overnight, 960 extended, and 1,440 all-section candles. The $525 call and put each returned 390 regular, 115 premarket, 15 postmarket, 520 extended/all, and no selected overnight candles. These are observed counts, without a continuity or exchange-calendar completeness guarantee. The option premarket section stops at 13:25 UTC and regular starts at 13:31 UTC; the adapter preserves that gap. Evidence: `coverage_audit/session_debug/public_audit.json` and the raw mode comparisons in `summary.json`.
-
-`all` compares every retained field when native feeds overlap. A conflict in OHLCV, turnover, volume precision, point type, or other native fields raises `session_feed_conflict`. The narrow exception is a paired difference in `previous_close` and its raw field 11 with all other fields identical: the preceding section can differ between feeds. The merged `previous_close` becomes null, canonical raw field 11 is omitted and marked ambiguous, and both complete original bars remain under `native_session_feed_variants` with their enum provenance. Source/data metadata report `ambiguous_previous_close_count` and the merge policy; single-feed values remain unchanged. The recorded first MSFT regular candle demonstrates this context difference: 517.56 in the extended feed versus 516.27 in the overnight feed. Offline integrity evidence: `coverage_audit/session_debug/overlap_integrity_audit.json`.
-
-Additional actual checks covered stock 3m all (480 candles, one previous-close ambiguity), 15m extended (64), 30m regular (13), option 15m premarket (8), and option 30m postmarket (1). The tested October 26 $525 call/put returned empty 3m histories, including provider-default follow-up requests; 3m option coverage is therefore unverified. Earlier actual checks covered 1m, 5m, and 1h. Evidence: `remaining_intervals_live.json` and `followup_option_3m.json` in the same audit directory.
-
-SPCX October 26 $147 call/put default responses each contained 390 native-section-21 candles on October 23, with exactly the same timestamps as the observed MSFT regular section: 13:31–20:00 UTC. The adapter retains raw section 21 rather than rewriting it to 22. After adding this observed mapping, actual Python requests returned the same 390 unmodified native bars for `regular`, `extended`, and `all`; `premarket`, `postmarket`, and `overnight` each returned an explicit empty selection. An HTTP `regular` request also returned 390 bars. All 15 checks completed: nine actual-data passes and six empty selections. Saved-response regressions cover this additional option regime and still reject unknown section IDs. Initial failures remain in the original SPCX audit; fixed responses and the summary are separate under `coverage_audit/spcx/fixed_sessions_live.json`.
+`all` compares every retained field when native feeds overlap. A conflict in OHLCV, turnover, volume precision, point type, or other native fields raises `session_feed_conflict`. The narrow exception is a paired difference in `previous_close` and its raw field 11 with all other fields identical: the preceding section can differ between feeds. The merged `previous_close` becomes null, canonical raw field 11 is omitted and marked ambiguous, and both complete original bars remain under `native_session_feed_variants` with their enum provenance. Source/data metadata report `ambiguous_previous_close_count` and the merge policy; single-feed values remain unchanged.
 
 ```python
 adjusted = client.bars("US.AAPL", start="2020-08-27", end="2020-09-02",
                        adjustment="forward")
 ```
 
-The default adjustment is none. Forward/backward select verified native enum values, and each response page must echo the requested mode. All three modes were downloaded across AAPL's 2020 and NVDA's 2024 split windows. These are provider-applied adjustments, not an independently reconstructed total-return series or a futures-roll adjustment. There is no standalone corporate-action event endpoint.
+The default adjustment is none. Forward/backward select verified native enum values, and each response page must echo the requested mode. These are provider-applied adjustments, not an independently reconstructed total-return series or a futures-roll adjustment. There is no standalone corporate-action event endpoint.
 
 With start supplied, the adapter paginates up to 100 pages / 100,000 candles. Without it, the latest 500 candles are requested. Results include requests, completion_reason, older_history_available, truncated, and coverage_continuity_verified=False. lower_bound_reached means pagination crossed the requested start; provider_history_exhausted means the server stopped earlier. Neither certifies every expected trading date. Empty results never count as coverage.
 
 Version 0.2.3 fixes a start-day pagination defect: reaching a row on the starting date no longer stops an intraday request partway through that day. The reader continues to a prior market date or explicit provider exhaustion. Conflicting duplicate timestamps within or between pages fail with `native_result_invalid`, while exact duplicates deduplicate without discarding raw fields. Clearly future-only ranges make no chart request, return no bars, and retain unknown `older_history_available=None`; ranges extending into the future cannot claim `complete_requested_range=True`. Inspect `requested_range_extends_into_future` and `completion_reason`.
-
-The actual long-history download returned **11,075 AAPL daily candles from 1982-11-12 through 2026-10-23**, across 12 pages. The requested start was 1980, so this is provider history exhaustion. October 23 returned **390 one-minute candles**.
 
 The public catalog is not a point-in-time universe. Delisted tickers can be absent, and old tickers can refer to new issuers. Historical identity and membership data are still needed for survivorship-bias-free backtests.
 
@@ -327,8 +315,6 @@ Each response states formulas, parameters, seed rules, warm-up requirements, and
 
 Periods count supplied bars. No extra prehistory is silently fetched and no missing sessions are filled, so supply an earlier start when the strategy needs a warm-up window. Recursive values depend on the first input bar. Calculations use only current and preceding bars, with prefix-invariance regression tests. These explicit formulas have not been checked for exact equality with every configurable Futu chart indicator. The result is marked locally derived, and retains the candle response's adjustment, coverage, and incomplete-latest-bar limitations.
 
-Actual May 1–October 23, 2026 downloads passed all eight families on AAPL (122 daily bars), Tencent (120), ZNmain (122), USD/JPY (126), a Bitcoin reference (176), BTC/USD spot (176), and the server-discovered AAPL June 17, 2027 $350 call (122). Each invocation fetched candles exactly once and retained bar fields and provenance. Evidence: coverage_audit/push_test/indicator_live_cross_asset.json. This checks computation on real downloaded data, not native chart-value parity.
-
 ## Daily short-selling volume
 
 ```python
@@ -343,8 +329,6 @@ with FutuClient.desktop() as client:
 US stocks use native protocol 6699 and Hong Kong stocks use 6379. The verified page limit is 1–50. The response preserves exact share counts and computes the fraction and percentage as short-selling shares divided by total shares. This is daily trading flow, not outstanding short interest. Futu describes US coverage as NYSE/Nasdaq groups and HK coverage as HKEX; US results are not claimed to cover every venue. See [Futu's definitions](https://www.futuhk.com/en/support/topic1_535).
 
 Optional start/end are inclusive YYYY-MM-DD dates that filter the current downloaded page. They do not cause automatic historical traversal. Keep following next_cursor when has_more is true, even if a locally filtered page is empty. Native missing-value sentinels remain null; no publication-time availability or complete-history claim is made.
-
-Actual October 23 records: AAPL 5,619,806 short shares / 39,539,690 total shares = 14.2130755%; Tencent 3,218,500 / 33,161,473 = 9.7055399%. Both stocks returned two 20-record pages with no overlapping dates. Fifty-record pages reached August 14 and August 13 respectively, with older records still indicated. Python and HTTP pagination/date/error checks passed. Evidence: coverage_audit/short_volume/short_public_audit.json.
 
 ## Stock news
 
@@ -362,8 +346,6 @@ with FutuClient.desktop() as client:
 This uses the desktop's native stock-news service, protocol 7912. It returns headline IDs, titles, publication times, links, and available publisher/language metadata. It does not download article bodies. FTNews.dll is checked separately against the verified build; unsupported or unloaded news modules leave this capability unavailable.
 
 The limit is 1–100 items per request. Follow the opaque next_cursor only when has_more is true; a terminal response may still contain a cursor. Dates use UTC and include the whole end date; timestamps require a timezone. Local date filtering can leave an empty page with has_more still true. returned_count and filtered_out_count explain this case. News publication timestamps do not establish when the information first became available, and the feed is not a complete historical archive.
-
-The actual AAPL test downloaded two pages containing 40 distinct headlines with no overlap, a separate 100-item page, and 39 items within the October 22–23 UTC window. An empty future window was also verified. Tencent returned 20 items. Evidence is saved in coverage_audit/push_test/library_news_audit.json, coverage_audit/evidence/news_limits_dates.json, and the Hong Kong audit below.
 
 ## Earnings calendar
 
@@ -390,11 +372,9 @@ with FutuClient.desktop() as client:
     print(call.data["transcript"])
 ```
 
-Report lookup uses native protocol 20846 and accepts the provider fiscal label YYYYQ1 through YYYYQ4. It returns a public earnings-hub webpage, not an original filing PDF. Only public id, period, and stock_id query parameters are retained. AAPL native fiscal 2026Q3 returned URL period 2026Q2; native 2025Q4 returned URL period 2025Q3. Both labels are preserved without inventing a conversion.
+Report lookup uses native protocol 20846 and accepts the provider fiscal label YYYYQ1 through YYYYQ4. It returns a public earnings-hub webpage, not an original filing PDF. Only public id, period, and stock_id query parameters are retained. Provider fiscal labels and URL periods are retained separately without inventing a conversion.
 
 The call helper follows that verified link to anonymous public Futu report/call pages. It returns the meeting identity, recording URLs, language metadata, and subtitle links. include_transcript=False is the default. With language="page", optional transcript text is the public page's explicitly marked AI-generated section, without timing. It is not issuer-verified; dates or wording may be inconsistent. Other accepted selections are original, en, zh-Hans, zh-Hant and request the corresponding SRT. Actual subtitle requests returned HTTP 403; the function preserves transcript_error and does not silently substitute another language or page text. Recording links may expire, and no full audio/video download or playback availability is claimed.
-
-Actual AAPL 2026Q3 returned two recording variants and four subtitle tracks; Tencent 2026Q2 returned three recording variants and four tracks. Their public AI transcript sections contained 217 and 155 paragraphs respectively. No comments or viewer/account data are exposed. Evidence: coverage_audit/news_earnings/public_reports/calls_live_audit.json and the release-wheel smoke audit.
 
 ## Original report PDFs
 
@@ -419,11 +399,7 @@ The PDF downloader accepts verified public document hosts and routes, bounds res
 
 Report access errors distinguish transport context from document discovery. `public_http_error` retains the upstream HTTP status; HTTP 401, 403, and 429 map to service-unavailable status 503. A recognized announcement browser challenge produces `desktop_context_required`, while a parsed page with no verified attachment anchors produces `document_links_unavailable`. The app can open a report in its browser context while a separate anonymous request is rejected. The anonymous utility reports that outcome explicitly; no working desktop-context PDF extraction is claimed here.
 
-The signed-in app's Tencent announcement viewer exposed original attachments for 2025 Annual Report (notice 306888691) and 2026 Interim Report (notice 307975385). Both downloaded anonymously: 4,428,270 bytes / 282 pages and 5,451,089 bytes / 122 pages. Covers were rendered and visually verified. Original Chinese PDF text has imperfect font mappings, so plain text extraction is not assumed reliable.
-
-Anonymous announcement-page resolution did not expose usable attachment links in the actual test; automatic Futu historical filing discovery remains incomplete. `issuer_reports` separately reads Tencent's official archive and found eight annual/interim report links. This explicit issuer adapter currently supports HK.00700 only; it is not silently substituted for Futu and does not establish complete filing history. Generic Apple original-PDF discovery and all-company Futu announcement pagination remain unimplemented. Evidence: coverage_audit/news_earnings/public_reports/documents_live_audit.json; downloaded originals: output/pdf/.
-
-Separately observed links from SpaceX's official investor-relations event pages downloaded through the current `download_report_pdf` utility: the Q2 2026 Form 10-Q (150 pages), Q3 results (13 pages), Q3 Form 10-Q (64 pages), and Q3 edited webcast transcript (13 pages). These are explicit issuer-public attachments on `s21.q4cdn.com`, restricted to the observed tenant `184289198` and its public financial/content directories. They are separate from Futu's report/call data and do not establish a complete SpaceX archive or resolve the Microsoft SEC/desktop-context access case. The SpaceX Q3 issuer transcript PDF also does not imply that the Futu call helper returned a transcript. Exact URLs, original bytes, SHA-256 hashes, page counts, and rendered covers are recorded in `coverage_audit/spcx/documents.json`; local originals are under `output/pdf/`.
+Automatic Futu historical filing discovery remains incomplete. `issuer_reports` separately reads Tencent's official archive. This explicit issuer adapter currently supports HK.00700 only; it is not silently substituted for Futu and does not establish complete filing history. Generic Apple original-PDF discovery and all-company Futu announcement pagination remain unimplemented.
 
 ## Books, trades, and native push
 
@@ -454,14 +430,6 @@ Gap and lifecycle records use event.type="heartbeat" and event.result.data.event
 stream.reconnect() re-establishes the subscription and can reattach to the same running Futu process after an instrumentation detach. PID and process-creation identity are checked before recovering retained handles. Other active streams are restored too. A restarted Futu process requires a new client. Native unsubscribe batching is allowed to settle before resubscription; these bounded checks inspect subscription bookkeeping only. Shared subscriptions owned by the app remain untouched. Futu does not promise a new bootstrap for an already shared subscription. There is no exchange replay or Last-Event-ID resumption, and lossless=False remains explicit.
 
 Closing a stream wakes its readers before cleanup. Unsubscribe cleanup has a bounded wait so an unresponsive native call cannot prevent the provider from attempting detach; timed-out cleanup retains its handle provenance in the provider. A frozen desktop/instrumentation runtime can still require restarting the bridge. Native queue reads do not invoke upstream requests; the explicit polling mode retains its older upstream-call timeout limitations.
-
-The October 25, 2026 actual audit captured AAPL stock and October 26 $347.50 call/put native quote/book images, then verified resubscription, instrumentation detach/reattach, intentional local callback loss, and bounded queue overflow. All eight available delivery/lifecycle checks passed with no polling calls and no remaining test-owned handles. The Sunday session produced no genuine trade-bit-35 pushes. Trade decoding, deduplication, and gap handling pass fixture tests, but open-market trade delivery and latency remain unverified. Evidence: coverage_audit/push_test/library_push_audit_settled.json.
-
-## Hong Kong verification
-
-The October 25 Tencent audit used the catalog-resolved HK.00700 identity and the same public Python API as US stocks. Actual downloads returned a quote with an October 23 exchange timestamp, four daily candles in the October 19–23 request window, 331 one-minute candles for October 23, ten bid levels and ten ask levels, 100 recent public prints, and 20 stock-news headlines. These are observed record counts, not a claim of complete session coverage.
-
-Native quote and book callbacks arrived on the initial subscription, after resubscription, and after an actual instrumentation detach/reattach. All test-owned subscription handles were released. The Sunday observation window contained no new trade pushes; recent-trade downloads and newly arriving trades are separate checks. Reproduce with `python coverage_audit/audit_hk_native.py`; full responses and lifecycle evidence are in coverage_audit/push_test/hk_00700_audit.json. Hong Kong options remain experimental and are not covered by this Tencent stock audit.
 
 ## Optional HTTP API
 
@@ -500,21 +468,10 @@ Invoke-RestMethod 'http://127.0.0.1:8765/v1/bars?symbol=US.ZNmain&start=2026-10-
 
 ## Repeat verification
 
-The current 0.2.3 Python regression result is recorded in `coverage_audit/unit_suite_0.2.3.log`. Session tests include saved actual-response partitions, Python/HTTP routing, unknown-section rejection, overlap field conflicts, and explicit preservation of per-feed previous-close variants. Actual session downloads are recorded separately in `coverage_audit/session_debug/`; saved-response replays and synthetic negative cases are labeled as such.
-
-The expanded hardening audit is in `coverage_audit/hardening/live/report.json`, with its runner `coverage_audit/audit_hardening_live.py`. It completed 278 actual desktop/HTTP and invariant checks across 18 base instruments and 14 options: 232 passed, 40 returned explicitly empty selections, and six were unavailable/unsupported. It covered US/Hong Kong stocks, ETFs, a cash index, Treasury/equity/metals futures, forex, Bitcoin futures/spot, a cash bond, seven option underlyings, news/short-volume pagination, inclusive bounds, weekends, future ranges, and quote/book delivery after reconnect and detach/reattach. No invalid decoded data or unexpected exceptions occurred. All test subscriptions were released. The Sunday observation still does not verify newly arriving market trade pushes.
-
-The preserved 0.2.2 wheel returned only 170 SPCX minute bars for October 22 through date-only bounds, while an independent timestamp query returned 1,440. The corrected working source returned 1,440 for that date and 2,880 for October 22–23, with equivalent results for AAPL and MSFT. The initial comparison of two date-only queries falsely agreed because both shared the same defect; the new test uses independent transport bounds. See `coverage_audit/hardening/baseline_022.json`. This broad audit ran the corrected working source before the 0.2.3 version bump and final future-end metadata correction; its captured source hashes identify that state. Final regressions and extracted-wheel tests check the release itself.
-
-SPY and QQQ options returned 405 native regular-section minute bars through 20:15 UTC, while the tested individual-stock options returned 390 regular bars. Saved-response regressions retain that distinction without imposing stock hours on options. Decoder tests include 300 deterministic malformed inputs, conflicting critical fields, int32 signing, precision/date/timestamp limits, and retained unknown wire extensions. Unknown fields 24/25 remain raw data with unverified semantics. Fault tests also cover truncated/oversized HTTP documents, atomic PDF publication races, partial native subscriptions, malformed HTTP origins, and cleanup failures.
-
-The earlier 0.2.1 release recorded **311 Python tests** and **50 JavaScript VM checks** across native push, news, calendar, report-link and short-volume observers. Those counts describe that earlier release. VM stubs verify filtering and failure paths; they are separate from actual desktop/API/download evidence. `coverage_audit/verify_wheel.py` compares packaged sources/resources with the workspace and imports the wheel in isolation. The release-wheel smoke runner checks quotes, news, short volume, calendars, historical report/call lookups, indicators, temporary HTTP routes, and native callbacks with cleanup; inspect its versioned evidence for the release actually tested.
-
-The independent third-stock audit uses US.MSFT (stock ID 201345), a dynamically discovered October 26 $525 call and put, and both direct Python and HTTP APIs. Downloads returned 7,500 daily stock bars from January 2, 1997 through October 23, 2026; 390 stock minute bars; 520 minute bars for each option; 100 recent prints per instrument; two news pages without duplicate IDs; and two 50-record short-volume pages without overlapping dates. July/October calendar lookups returned matching MSFT events. Fiscal label 2026Q4 resolved to URL period 2026Q2; the call page returned two recordings, four subtitle links, and 181 AI transcript paragraphs.
-
-Native quotes and books arrived for all three instruments on initial subscription, resubscription, and capture detach/reattach. Polling and HTTP SSE delivery were tested separately. Queue overflow was reported; dropping callback 1 and receiving callback 2 produced a missing-message notice. The original test also preserved an unobservable trailing-loss case: discarding the final callback produces no sequence gap until a later message arrives. New trade pushes remain pending in the Sunday session. The earlier MSFT audit observed an annual-report attachment on SEC that returned HTTP 403 to an anonymous request. The current helper accepts that strict public SEC route and classifies remote rejection separately from invalid URLs; a successful MSFT PDF download is not established by that earlier audit. See coverage_audit/third_stock_msft/report.json, followup.json, and validation.json, with audit runners coverage_audit/audit_third_stock.py and audit_third_stock_followup.py.
-
-The additional SPCX audit downloaded 93 daily stock candles from June 12 through October 23, 2026 and 1,440 one-minute stock candles with `session="all"`. Its October 26 $147 call and put each returned 390 regular-section candles, preserving raw section 21. Actual explicit option `premarket`, `postmarket`, and `overnight` selections were empty, while `regular`, `extended`, and `all` retained the same 390 native bars. These counts describe the tested windows and contracts, without a history-completeness guarantee. The original mapping errors are preserved separately from the fixed checks in `coverage_audit/spcx/initial_report.json` and `fixed_sessions_live.json`. Historical/upcoming calendars each returned one event; a fresh Q3 Futu call lookup returned `available=False` and no recordings, so the separately downloaded issuer transcript PDF is not counted as a successful Futu call result. Evidence: `coverage_audit/spcx/followup_information.json`.
+Historical numerical results whose cited audit files are absent have been removed.
+Current joint-workflow verification and its limits are documented in
+[the Parquet release status](../docs/parquet-release.md). A configured route or
+synthetic test case is not proof of a successful market-data observation.
 
 ```powershell
 # Captured-payload regressions, synthetic edge cases, Python/local-HTTP contracts.
@@ -523,10 +480,6 @@ The additional SPCX audit downloaded 93 daily stock candles from June 12 through
 # Actual desktop/HTTP audit; Futu must be running.
 & D:\python\python.exe -m futu_bridge.full_audit --start 2026-10-19 --end 2026-10-23
 
-# Actual US stock/option session selections; retains empty responses explicitly.
-& D:\python\python.exe coverage_audit/audit_session_public.py
-& D:\python\python.exe coverage_audit/audit_session_remaining.py
-
 # Actual push, reconnect, callback-drop, and overflow audit.
 & D:\python\python.exe -m futu_bridge.push_audit --seconds 20
 
@@ -534,8 +487,6 @@ The additional SPCX audit downloaded 93 daily stock candles from June 12 through
 # AAPL and the dynamically selected nearby call and put; absence exits nonzero.
 & D:\python\python.exe -m futu_bridge.push_audit --seconds 60 --require-trades
 
-# During a Hong Kong market session: require newly timestamped Tencent trades.
-& D:\python\python.exe coverage_audit/audit_hk_native.py --seconds 60 --require-trades --output coverage_audit/push_test/hk_00700_market_hours.json
 ```
 
 The full audit starts a temporary loopback server, requests four feeds for every universe instrument plus equities/ETF/index/delisted examples, discovers actual AAPL options and tests a nearby call and put, observes SSE, checks catalog/ticker identities, and downloads Python history/timeframe/adjustment cases. It saves actual responses, then closes the server and provider. No mock or bundled sample substitutes for a successful data download.

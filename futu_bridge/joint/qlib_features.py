@@ -144,13 +144,15 @@ def benchmark_operations(frame: pd.DataFrame, repeats: int = 7) -> dict[str, obj
 def remaining_constraints() -> dict[str, object]:
     """Inspect concrete local prerequisites rather than reporting unattempted families as covered."""
     services = {}
-    for service, executable, port in (("mongodb", "mongod", 27017), ("redis", "redis-server", 6379)):
+    for service, executable, port in (("redis", "redis-server", 6379),):
         with socket.socket() as probe:
             probe.settimeout(.2)
             listening = probe.connect_ex(("127.0.0.1", port)) == 0
         services[service] = {"executable_on_path": shutil.which(executable), "localhost_listening": listening}
-    return {"distributed_TaskManager": {"status": "service_unconfigured", "requires": "MongoDB",
-                                         "local_TrainerR_tasks_verified": True, **services["mongodb"]},
+    return {"local_task_workflows": {"status": "separate_acceptance_suite", "requires_mongodb": False,
+                                     "coordinator": "SQLite", "immutable_history": "Parquet",
+                                     "entrypoint": "futu_bridge.joint.workflows.acceptance",
+                                     "separate_host_operation_verified": False},
             "Redis_expression_service": {"status": "service_unconfigured", **services["redis"]},
             "native_MetaModelDS": {"status": "insufficient_cross_section",
                 "reason": "InternalData._calc_perf uses per-date Spearman IC; one stock yields all NaN",
@@ -221,7 +223,8 @@ def run(response: Path, output: Path, repo: Path) -> dict[str, object]:
                   "limitations": ["VWAP unavailable: raw turnover scale unverified; missing fields explicitly imputed",
                                   "Single-stock data cannot validate ranking, IC or cross-sectional risk models",
                                   "Smoke training does not establish financial skill or full catalogue coverage",
-                                  "Distributed tasks, Redis expression service and meta-learning remain pending",
+                                  "Local task recovery and meta-learning use separate acceptance suites",
+                                  "Separate-host task operation and a Redis expression service are not verified",
                                   "Rolling retraining is historical; no continuous online service is launched"]}
         write_report(output / "report.json", report)
         write_report(output / "status.json", {"state": "completed"})

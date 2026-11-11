@@ -66,13 +66,15 @@ configuration; it does not certify later edits to the same files.
 | Cross-engine order lifecycle | [390 simulated scenarios](../output/joint/lifecycle_extended_final_20261109/report.json) | Preserve this baseline while extending behavior and persistence |
 | Qlib features and models | [Passing feature report](../output/joint/qlib_features_final_20261109/report.json): Alpha158/360, eleven model configurations, rolling workflows and portfolios | Broader model catalogue, cross-sectional workflows, task coordination, caches and continuous scheduling |
 | Nautilus | [Catalogue and features](../output/joint/nautilus_features_verified_20261109/report.json), [35 contingent-order runs](../output/joint/nautilus_contingent_verified_20261109/report.json) | Partial-parent activation, full simulation recovery and remaining native capability families |
-| LEAN | [Earlier native framework run](../output/joint/lean_features_final2_20261109/report.json), [clean Python host exit](../output/joint/lean_features_python_host_probe2_20261109/host.json) | Current [combined run failed](../output/joint/lean_features_integrated_20261109/status.json); optimizer and QuantBook paths need repair |
+| LEAN | [Earlier native framework run](../output/joint/lean_features_final2_20261109/report.json), [clean Python host exit](../output/joint/lean_features_python_host_probe2_20261109/host.json) | The earlier optimizer/research integration gap is superseded by the [passing November10 combined run](../output/joint/plan_completion_20261110/features/report.json) |
 | MLflow | [Passing local service and registry report](../output/joint/mlflow_features_final_20261109/report.json) | Dataset snapshot lineage, scheduler reconciliation, sustained service recovery |
 | Common selection and coverage | `performance.py`, `coverage_runner.py`, `capabilities.py` exist | Combined feature and final performance report paths referenced by the inventory do not exist |
 
-MongoDB binaries were downloaded, but startup did not become operational. The
-Mongo-backed `qlib_features_tasks.py` has no successful integration report.
-The development path below does not depend on resolving that server problem.
+The earlier MongoDB task experiment is retired. `qlib_features_tasks.py` now
+delegates to the local task replacement, and the feature CLI has no MongoDB
+option. Parquet stores analytical data and immutable task history; SQLite
+coordinates transactional task state. Qlib's installed `pymongo` import
+dependency does not imply a MongoDB service or storage backend.
 
 ## Storage architecture
 

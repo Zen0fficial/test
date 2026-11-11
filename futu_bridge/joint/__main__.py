@@ -73,7 +73,6 @@ def main() -> None:
     features.add_argument("--response", type=Path, required=True)
     features.add_argument("--daily-response", type=Path, required=True)
     features.add_argument("--output", type=Path, required=True)
-    features.add_argument("--mongo-uri")
     features.add_argument("--platforms", nargs="+", choices=("qlib", "nautilus", "lean", "mlflow"),
                           default=["qlib", "nautilus", "lean", "mlflow"])
     performance = commands.add_parser("benchmark-features")
@@ -120,7 +119,7 @@ def main() -> None:
         report = research.simulate_native(args.output, response=args.response)
     elif args.command == "verify-features":
         report = research.verify_features(args.output, response=args.response, daily_response=args.daily_response,
-                                          platforms=tuple(args.platforms), mongo_uri=args.mongo_uri)
+                                          platforms=tuple(args.platforms))
     elif args.command == "benchmark-features":
         report = research.benchmark_features(args.capture, args.storage, args.output)
     else:

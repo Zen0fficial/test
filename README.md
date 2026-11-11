@@ -82,6 +82,11 @@ preserving their original input path and unchanged learning budgets.
 the three native simulated execution engines. The fixed providers and shared
 environment remain unchanged.
 
+MongoDB is no longer an executable task backend: the former task entrypoint
+delegates to the local replacement, and `--mongo-uri` is rejected. The pinned
+`pymongo` package remains only for upstream Qlib import compatibility. The old
+MongoDB installer script is retired and cannot recreate the unused downloads.
+
 The expanded adapters include [29 native Qlib learner classes and MetaModelDS](docs/qlib-native-models.md),
 [durable online scheduling](docs/qlib-online-parquet.md), [37 native Nautilus indicators](docs/native-indicators.md),
 [activation-price orders](docs/native-activation-orders.md), and
@@ -93,6 +98,12 @@ See the [Parquet release status](docs/parquet-release.md) for implementation
 choices, real-data verification, native execution differences and the remaining
 engineering/data/dependency gaps. [Panel signal analysis](docs/panel-signal-analysis.md)
 checks saved learner outputs without refitting or executing trades.
+
+The November 11 local retest passed 484 Python regressions, three JavaScript
+tests, and the offline training, simulation, recovery, storage and packaging
+checks. Live converters connected after the Hong Kong close but received no
+fresh updates, so live freshness remains unverified. See the release status
+for the exact scope and remaining gaps; tests and private captures stay local.
 
 The [LEAN feature workflow](docs/lean-feature-coverage.md) includes native
 optimization and shared-Python QuantBook verification. See
